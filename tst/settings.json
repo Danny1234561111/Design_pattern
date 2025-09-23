@@ -1,0 +1,10 @@
+{
+  "company": {
+    "name": "Киви",
+    "inn": "111122223333",
+    "account": "40702810000",
+    "correspondent_account": "33301719999",
+    "bic": "123456111",
+    "ownership_type": "ООО"
+  }
+}
