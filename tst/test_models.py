@@ -59,7 +59,6 @@ class TestModels(unittest.TestCase):  # Наследуемся от unittest.Tes
         filename = "./Design_pattern/tst/settings.json"
         manager = SettingsManager(filename)
         manager.load()
-        print(manager.settings.company.name)
         with self.assertRaises(ValueError):
             manager.settings.company.name = None
 

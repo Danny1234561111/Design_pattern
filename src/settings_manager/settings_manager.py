@@ -43,7 +43,6 @@ class SettingsManager:
 
             return self.convert(data)
         except Exception as error:
-            print(error)
             return False
 
     def convert(self, data: dict) -> bool:
@@ -52,9 +51,9 @@ class SettingsManager:
             self.__settings.company.name = company_data["name"]
             self.__settings.company.account = company_data["account"]
             self.__settings.company.correspondent_account = company_data["correspondent_account"]
-            self.__settings.company.BIK = company_data["BIK"]
+            self.__settings.company.bic = company_data["bic"]
             self.__settings.company.ownership_type = company_data["ownership_type"]
-            self.__settings.company.INN = company_data["INN"]
+            self.__settings.company.inn = company_data["inn"]
 
             return True
 
