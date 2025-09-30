@@ -1,0 +1,84 @@
+from Src.Core.validator import validator
+from Src.Core.abstract_model import abstact_model
+
+###############################################
+# Модель организации
+class company_model(abstact_model):
+    __name:str = ""
+    __inn:int = 0
+    __bic:int = 0
+    __corr_account:int = 0
+    __account:int = 0
+    __ownership:str = ""
+
+    def __init__(self, name: str = "", inn: int = 0, bic: int = 0, corr_account: int = 0, account: int = 0,
+                 ownership: str = ""):
+        self.__name = name
+        self.__inn = inn
+        self.__bic = bic
+        self.__corr_account = corr_account
+        self.__account = account
+        self.__ownership = ownership
+    # Наименование
+    @property
+    def name(self) -> str:
+        return self.__name
+
+    @name.setter
+    def name(self, value:str):
+        validator.validate(value, str)
+        self.__name = value.strip()
+
+    # ИНН
+    @property
+    def inn(self) -> int:
+        return self.__inn
+    
+    @inn.setter
+    def inn(self, value:int):
+        validator.validate(value, int, 12)
+        self.__inn = value
+
+    # КПП
+    @property
+    def bic(self) -> int:
+        return self.__bic
+
+    @bic.setter
+    def bic(self, value:int):
+        validator.validate(value, int, 9)
+        self.__bic = value
+
+    # Корреспондентский счет
+    @property
+    def corr_account(self) -> int:
+        return self.__corr_account
+        
+    @corr_account.setter
+    def corr_account(self, value:int):
+        validator.validate(value, int, 11)
+        self.__corr_account = value
+
+    @property
+    def account(self) -> int:
+        return self.__account
+    
+    @account.setter
+    def account(self, value:int):
+        validator.validate(value, int, 11)
+        self.__account = value
+
+    @property
+    def ownership(self) -> str:
+        return self.__ownership
+    
+    @ownership.setter
+    def ownership(self, value:str):
+        validator.validate(value, str, 5)
+        self.__ownership = value.strip()
+
+ 
+
+       
+
+
