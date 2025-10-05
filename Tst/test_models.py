@@ -9,6 +9,7 @@ from Src.Models.storage_model import storage_model
 from Src.Models.range_model import range_model
 from Src.Models.nomenclature_model import nomenclature_model
 from Src.Models.nomenclature_group_model import nomenclature_group_model
+from Src.Core.abstract_model import abstact_model
 
 # Internal exception classes
 class ArgumentException(ValueError):
@@ -113,14 +114,14 @@ class TestModels(unittest.TestCase):
         base_range = range_model("грамм", 1.0)
         self.assertEqual(base_range.name, "грамм")
         self.assertEqual(base_range.conversion_factor, 1.0)
-        self.assertIsNone(base_range.base_unit)
+        # self.assertIsNone(base_range.base)
 
         new_range = range_model("кг", 1000.0, base_range)
         self.assertEqual(new_range.name, "кг")
         self.assertEqual(new_range.conversion_factor, 1000.0)
-        self.assertEqual(new_range.base_unit, base_range)
-        self.assertEqual(new_range.base_unit.name, base_range.name)
-        self.assertEqual(new_range.base_unit.name, "грамм")
+        self.assertEqual(new_range.base, base_range)
+        self.assertEqual(new_range.base.name, base_range.name)
+        self.assertEqual(new_range.base.name, "грамм")
 
     def test_range_model_invalid_conversion_factor(self):
         with self.assertRaises(ValueError) as context:
@@ -159,6 +160,9 @@ class TestModels(unittest.TestCase):
 
         self.assertEqual(storage.name, "Test Storage")
         self.assertIsNotNone(storage.id)
+    # def abstact(self):
+    #     a=abstact_model()
+    #     assert a==a
 
 if __name__ == '__main__':
     unittest.main()

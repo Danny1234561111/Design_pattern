@@ -1,30 +1,21 @@
 from Src.Core.validator import validator
-from Src.Core.abstract_model import abstact_model
+from Src.Core.entity_model import entity_model
 from typing import Optional, TYPE_CHECKING
 from Src.Models.nomenclature_group_model import nomenclature_group_model
 from Src.Models.range_model import range_model
 
-class nomenclature_model(abstact_model):
-    __name: str = ""
+class nomenclature_model(entity_model):
     __full_name: str = ""
-    __group: nomenclature_group_model
-    __unit: range_model
+    __group: nomenclature_group_model=None
+    __unit: range_model = None
 
-    def __init__(self, name: str, full_name: str, group: nomenclature_group_model, unit: range_model):
-        super().__init__()
-        self.name = name
-        self.full_name = full_name
-        self.group = group
-        self.unit = unit
+    def __eq__(self, other):
+        if isinstance(other, nomenclature_model):
+            return self.name == other.name and self.full_name == other.full_name and self.group == other.group and self.unit == other.unit
+        return False
 
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value: str):
-        validator.validate(value, str)
-        self.__name = value.strip()
+    def __hash__(self):
+        return hash((self.name, self.full_name, self.group, self.unit))
 
     @property
     def full_name(self) -> str:
@@ -54,7 +45,5 @@ class nomenclature_model(abstact_model):
 
     @unit.setter
     def unit(self, value: range_model):
-
-        from Src.Models.range_model import range_model
         validator.validate(value, range_model)
         self.__unit = value

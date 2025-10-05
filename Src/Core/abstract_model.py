@@ -1,23 +1,25 @@
 from abc import ABC
 import uuid
 from Src.Core.validator import validator
+from typing import Optional
+
 
 class abstact_model(ABC):
-    __unique_code: str
-    __name: str
+    __id: str
+    __name: str  # Имя должно быть инициализировано
 
     def __init__(self) -> None:
         super().__init__()
-        self.__unique_code = uuid.uuid4().hex
+        self.__id = uuid.uuid4().hex
 
     @property
-    def unique_code(self) -> str:
-        return self.__unique_code
+    def id(self) -> str:
+        return self.__id
 
-    @unique_code.setter
-    def unique_code(self, value: str):
+    @id.setter
+    def id(self, value: str):
         validator.validate(value, str)
-        self.__unique_code = value.strip()
+        self.__id = value.strip()
 
     @property
     def name(self) -> str:
@@ -32,5 +34,5 @@ class abstact_model(ABC):
 
     def __eq__(self, other) -> bool:
         if isinstance(other, abstact_model):
-            return self.__unique_code == other.__unique_code
+            return self.id == other.id #Используем геттер
         return False

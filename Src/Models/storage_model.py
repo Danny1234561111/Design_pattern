@@ -1,16 +1,53 @@
+# Src/Models/storage_model.py
 from Src.Core.validator import validator
-from Src.Core.abstract_model import abstact_model
+from Src.Core.entity_model import entity_model
+from typing import Dict
+from Src.Models.nomenclature_model import nomenclature_model
 
-class storage_model(abstact_model):
-    __name: str = ""
-    def __init__(self,name:str=""):
-        self.__name=name
-    # Наименование
+"""
+Модель склада
+"""
+class storage_model(entity_model):
+    __address: str = ""
+    __inventory: Dict[nomenclature_model, float] = {} #  Словарь: ингредиент -> количество
+
+    """
+    Адрес
+    """
     @property
-    def name(self) -> str:
-        return self.__name
+    def address(self) -> str:
+        return self.__address.strip()
 
-    @name.setter
-    def name(self, value:str):
+    @address.setter
+    def address(self, value: str):
         validator.validate(value, str)
-        self.__name = value.strip()
+        self.__address = value.strip()
+
+    """
+    Инвентарь склада (ингредиенты и их количество)
+    """
+    @property
+    def inventory(self) -> Dict[nomenclature_model, float]:
+        return self.__inventory
+
+    @inventory.setter
+    def inventory(self, value: Dict[nomenclature_model, float]):
+        # TODO: Валидация типов в словаре
+        self.__inventory = value
+
+    def add_item(self, item: nomenclature_model, quantity: float):
+        """Добавляет ингредиент на склад"""
+        if item in self.__inventory:
+            self.__inventory[item] += quantity
+        else:
+            self.__inventory[item] = quantity
+
+    def remove_item(self, item: nomenclature_model, quantity: float):
+        """Удаляет ингредиент со склада"""
+        if item in self.__inventory:
+            if self.__inventory[item] >= quantity:
+                self.__inventory[item] -= quantity
+            else:
+                raise ValueError("Недостаточно ингредиента на складе")
+        else:
+            raise ValueError("Ингредиент отсутствует на складе")

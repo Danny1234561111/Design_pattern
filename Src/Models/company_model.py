@@ -1,33 +1,24 @@
+from Src.Core.entity_model import entity_model
 from Src.Core.validator import validator
-from Src.Core.abstract_model import abstact_model
+from Src.Core.entity_model import entity_model
 
 ###############################################
 # Модель организации
-class company_model(abstact_model):
-    __name:str = ""
+class company_model(entity_model):
     __inn:int = 0
     __bic:int = 0
     __corr_account:int = 0
     __account:int = 0
     __ownership:str = ""
 
-    def __init__(self, name: str = "", inn: int = 0, bic: int = 0, corr_account: int = 0, account: int = 0,
+    def __init__(self, inn: int = 0, bic: int = 0, corr_account: int = 0, account: int = 0,
                  ownership: str = ""):
-        self.__name = name
         self.__inn = inn
         self.__bic = bic
         self.__corr_account = corr_account
         self.__account = account
         self.__ownership = ownership
     # Наименование
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value:str):
-        validator.validate(value, str)
-        self.__name = value.strip()
 
     # ИНН
     @property
