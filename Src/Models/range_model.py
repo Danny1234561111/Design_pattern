@@ -1,65 +1,101 @@
+from Src.Core.validator import validator
 from Src.Core.entity_model import entity_model
-from Src.Core.validator import validator, argument_exception
+from typing import Optional
 
-"""
-Модель единицы измерения
-"""
 class range_model(entity_model):
-    __value:int = 1
-    __base:'range_model' = None
+    __base: Optional["range_model"]
+    __conversion_factor: float = 0
 
-    """
-    Значение коэффициента пересчета
-    """
+    def __init__(self, name: str, conversion_factor: Optional["float"]=None, base: Optional["range_model"] = None):
+        self.name = name
+        self.conversion_factor = conversion_factor
+        self.base = base
+
+    def __eq__(self, other):
+        if isinstance(other, range_model):
+            return self.name == other.name and self.conversion_factor == other.conversion_factor and self.base == other.base
+        return False
+
+    def __hash__(self):
+        return hash((self.name, self.conversion_factor, self.base))
+
     @property
-    def value(self) -> int:
-        return self.__value
-    
-    @value.setter
-    def value(self, value: int):
-        validator.validate(value, int)
-        if value <= 0:
-             raise argument_exception("Некорректный аргумент!")
-        self.__value = value
-
-
-    """
-    Базовая единица измерения
-    """
-    @property
-    def base(self):
+    def base(self) -> Optional["range_model"]:
         return self.__base
-    
+
     @base.setter
-    def base(self, value):
+    def base(self, value: Optional["range_model"]):
+        if value is not None:
+            validator.validate(value, range_model)
         self.__base = value
 
-    """
-    Киллограмм
-    """
-    @staticmethod
-    def create_kill():
-        inner_gramm = range_model.create_gramm()
-        return range_model.create(  "киллограмм", inner_gramm)
+    @property
+    def conversion_factor(self) -> Optional[float]:
+        return self.__conversion_factor
 
-    """
-    Грамм
-    """
+    @conversion_factor.setter
+    def conversion_factor(self, value: Optional[float]):
+        if value is not None:
+            validator.validate(value, (int, float))  # Разрешаем int или float
+            if value <= 0:
+                raise ValueError("Коэффициент пересчета должен быть больше 0.")
+        self.__conversion_factor = value
+
+    def to_base(self, value: float) -> float:
+        return value * self.conversion_factor
+
+    def from_base(self, value: float) -> float:
+        return value / self.conversion_factor
+
+    def get_conversion_factor_to(self, target_unit: "range_model") -> float:
+        if self == target_unit:
+            return 1.0
+        # If we have a base unit, try to convert to that first
+        if self.base is not None:
+            base_to_target = self.base.get_conversion_factor_to(target_unit)
+            if base_to_target is not None:  # Ensure a valid path exists
+                return self.conversion_factor * base_to_target
+            else:
+                return None
+        else:
+            return None
+
+    @staticmethod
+    def create_killogramm(gramm):
+        """Создает экземпляр килограмма."""
+        return range_model("килограмм",1000, gramm)
+
     @staticmethod
     def create_gramm():
-        return range_model.create("грамм")
-     
-    """
-    Универсальный метод - фабричный
-    """
+        """Создает экземпляр грамма."""
+        return range_model("грамм")
+
     @staticmethod
-    def create(name:str, base _):
-        validator.validate(name, str)
-        inner_base = None
-        if not base is None: 
-            validator.validate(base, range_model)
-            inner_base = base
-        item = range_model()
-        item.name = name
-        item.base = inner_base
-        return item
+    def create_liter(milliliter):
+        """Создает экземпляр литра."""
+        return range_model("литр", 1000, milliliter)
+
+
+    @staticmethod
+    def create_milliliter():
+        """Создает экземпляр миллилитра."""
+        return range_model("миллилитр")
+
+    @staticmethod
+    def create_piece():
+        """Создает экземпляр штуки."""
+        return range_model("штука")
+
+    @staticmethod
+    def create(name: str, koef=1,base=None):
+        """Метод для создания экземпляров range_model."""
+        if not isinstance(name, str):
+            raise ValueError("Name must be a string")
+
+        if base is not None and not isinstance(base, range_model):  # Проверка типа base
+            raise ValueError("Base must be a range_model instance")
+
+        if not isinstance(koef, (int, float)):
+            raise ValueError("Koef must be a number")
+
+        return range_model(name, koef, base)
