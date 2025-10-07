@@ -1,14 +1,12 @@
 from Src.Core.validator import validator
-from Src.Core.abstract_model import abstact_model
-class nomenclature_group_model(abstact_model):
-    __name: str = ""
-    def __init__(self,name:str=""):
-        self.__name=name
-    @property
-    def name(self,name="") -> str:
-        return self.__name
+from Src.Core.entity_model import entity_model
+class nomenclature_group_model(entity_model):
+    def __eq__(self, other):
+        if isinstance(other, nomenclature_group_model):
+            return self.name == other.name
+        return False
 
-    @name.setter
-    def name(self, value: str):
-        validator.validate(value, str)
-        self.__name = value.strip()
+    def __hash__(self):
+        return hash(self.name)
+    def __init__(self):
+        pass

@@ -1,22 +1,24 @@
+from Src.Core.entity_model import entity_model
 from Src.Core.validator import validator
 from Src.Core.entity_model import entity_model
 
 ###############################################
 # Модель организации
 class company_model(entity_model):
-    __name:str = ""
     __inn:int = 0
     __bic:int = 0
     __corr_account:int = 0
     __account:int = 0
     __ownership:str = ""
 
-    # ИНН : 12 симв
-    # Счет 11 симв
-    # Корреспондентский счет 11 симв
-    # БИК 9 симв
+    def __init__(self, inn: int = 0, bic: int = 0, corr_account: int = 0, account: int = 0,
+                 ownership: str = ""):
+        self.__inn = inn
+        self.__bic = bic
+        self.__corr_account = corr_account
+        self.__account = account
+        self.__ownership = ownership
     # Наименование
-    # Вид собственности 5 симв
 
     # ИНН
     @property
