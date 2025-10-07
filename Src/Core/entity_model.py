@@ -18,4 +18,3 @@ class entity_model(abstact_model):
     def name(self, value:str):
         validator.validate(value, str)
         self.__name = value.strip()
-
