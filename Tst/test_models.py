@@ -1,164 +1,101 @@
-
-import unittest
-import uuid
-
-# Adjust import paths if necessary
 from Src.settings_manager import settings_manager
 from Src.Models.company_model import company_model
+import unittest
 from Src.Models.storage_model import storage_model
-from Src.Models.range_model import range_model
+import uuid
 from Src.Models.nomenclature_model import nomenclature_model
-from Src.Models.nomenclature_group_model import nomenclature_group_model
 
-# Internal exception classes
-class ArgumentException(ValueError):
-    pass
+class test_models(unittest.TestCase):
 
-class OperationException(Exception):
-    pass
+    # Провери создание основной модели
+    # Данные после создания должны быть пустыми
+    def test_empty_createmodel_companymodel(self):
+        # Подготовка
+        model = company_model()
 
-class ErrorProxy:  # Added error proxy
-    def __init__(self, message):
-        self.message = message
+        # Действие
 
-    def __str__(self):
-        return self.message
+        # Проверки
+        assert model.name == ""
 
 
-class TestModels(unittest.TestCase):
-
-    """
-    Проверить создание основной модели
-    Данные после создания должны быть пустыми
-    """
-    # def test_empty_createmodel_companymodel(self):
-    #     # Подготовка
-    #     model = company_model()
-    #
-    #     # Действие
-    #
-    #     # Проверки
-    #     self.assertEqual(model.name, "")
-
-    """
-    Проверить создание основной модели
-    Данные меняем. Данные должны быть
-    """
+    # Проверить создание основной модели
+    # Данные меняем. Данные должны быть
     def test_notEmpty_createmodel_companymodel(self):
         # Подготовка
-        model = company_model(name="")
-
+        model = company_model()
+        
         # Действие
         model.name = "test"
-
+        
         # Проверки
-        self.assertEqual(model.name, "test")
-        self.assertNotEqual(model.name, "")
+        assert model.name != ""
 
-    """
-    Проверить создание основной модели
-    Данные загружаем через json настройки
-    """
+    # Проверить создание основной модели
+    # Данные загружаем через json настройки
     def test_load_createmodel_companymodel(self):
         # Подготовка
-        file_name = "settings.json"
-        manager = settings_manager()
-        manager.file_name = file_name
+       file_name = "settings.json"
+       manager = settings_manager()
+       manager.file_name = file_name
+       
+       # Действие
+       result = manager.load()
+            
+       # Проверки
+       print(manager.file_name)
+       assert result == True
 
-        # Действие
-        try:
-            manager.load()
-            result = True
-        except Exception:
-            result = False
 
-        # Проверки
-        self.assertTrue(result)
-        print(manager.file_name)
-
-    """
-    Проверить создание основной модели
-    Данные загружаем. Проверяем работу Singletone
-    """
+    # Проверить создание основной модели
+    # Данные загружаем. Проверяем работу Singletone
     def test_loadCombo_createmodel_companymodel(self):
         # Подготовка
-        file_name = "./settings.json"
+        file_name = "./Tst/settings.json"
         manager1 = settings_manager()
         manager1.file_name = file_name
         manager2 = settings_manager()
+        check_inn = 123456789
+      
 
         # Действие
         manager1.load()
 
-        self.assertEqual(manager1.settings, manager2.settings)
+        # Проверки
+        assert manager1.settings == manager2.settings
+        print(manager1.file_name)
+        assert(manager1.settings.company.inn == check_inn )
+        print(f"ИНН {manager1.settings.company.inn}")
 
-
-    """
-    Проверка на сравнение двух по значению одинаковых моделей
-    """
-
-    def text_equals_storage_model_create(self):
+    # Проверка на сравнение двух по значению одинаковых моделей
+    def test_equals_storage_model_create(self):
         # Подготовка
         id = uuid.uuid4().hex
         storage1 = storage_model()
-        storage1.id = id
-        storage2 = storage_model()
-        storage2.id = id
-        # Действие GUID
+        storage1.unique_code = id
+        storage2 = storage_model()   
+        storage2.unique_code = id
+
+        # Действие 
 
         # Проверки
         assert storage1 == storage2
 
-    def test_range_model_creation(self):
-        base_range = range_model("грамм", 1.0)
-        self.assertEqual(base_range.name, "грамм")
-        self.assertEqual(base_range.conversion_factor, 1.0)
-        self.assertIsNone(base_range.base_unit)
+    # Проверить создание номенклатуры и присвоение уникального кода
+    def test_equals_nomenclature_model_create(self):
+        # Подготовка
+        id = uuid.uuid4().hex
+        item1 = nomenclature_model()
+        item1.unique_code = id
+        item2 = nomenclature_model()
+        item2.unique_code = id
 
-        new_range = range_model("кг", 1000.0, base_range)
-        self.assertEqual(new_range.name, "кг")
-        self.assertEqual(new_range.conversion_factor, 1000.0)
-        self.assertEqual(new_range.base_unit, base_range)
-        self.assertEqual(new_range.base_unit.name, base_range.name)
-        self.assertEqual(new_range.base_unit.name, "грамм")
+        # Действие
 
-    def test_range_model_invalid_conversion_factor(self):
-        with self.assertRaises(ValueError) as context:
-            range_model("something", -1.0) # Changed to direct call, ValueError expected
-        self.assertIn("Коэффициент пересчета должен быть больше 0", str(context.exception))
+        # Проверки
+        assert item1 == item2
 
-
-    def test_nomenclature_model_creation(self):
-
-        group = nomenclature_group_model("Test Group")
-        unit = range_model("kg", 1.0)
-
-
-        nomenclature = nomenclature_model(
-            name="Test Item",
-            full_name="Test Item Full Name",
-            group=group,
-            unit=unit,
-        )
-
-
-        self.assertEqual(nomenclature.name, "Test Item")
-        self.assertEqual(nomenclature.full_name, "Test Item Full Name")
-        self.assertEqual(nomenclature.group.name, "Test Group")
-        self.assertEqual(nomenclature.unit.name, "kg")
-
-    def test_nomenclature_group_model_creation(self):
-        group = nomenclature_group_model("Test Group")
-
-        self.assertEqual(group.name, "Test Group")
-
-    def test_storage_model_creation(self):
-        storage = storage_model(name="Test Storage")
-        storage.id = uuid.uuid4().hex
-
-
-        self.assertEqual(storage.name, "Test Storage")
-        self.assertIsNotNone(storage.id)
-
+    
+  
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main()   

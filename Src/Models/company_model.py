@@ -1,9 +1,9 @@
 from Src.Core.validator import validator
-from Src.Core.abstract_model import abstact_model
+from Src.Core.entity_model import entity_model
 
 ###############################################
 # Модель организации
-class company_model(abstact_model):
+class company_model(entity_model):
     __name:str = ""
     __inn:int = 0
     __bic:int = 0
@@ -11,23 +11,12 @@ class company_model(abstact_model):
     __account:int = 0
     __ownership:str = ""
 
-    def __init__(self, name: str = "", inn: int = 0, bic: int = 0, corr_account: int = 0, account: int = 0,
-                 ownership: str = ""):
-        self.__name = name
-        self.__inn = inn
-        self.__bic = bic
-        self.__corr_account = corr_account
-        self.__account = account
-        self.__ownership = ownership
+    # ИНН : 12 симв
+    # Счет 11 симв
+    # Корреспондентский счет 11 симв
+    # БИК 9 симв
     # Наименование
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value:str):
-        validator.validate(value, str)
-        self.__name = value.strip()
+    # Вид собственности 5 симв
 
     # ИНН
     @property
