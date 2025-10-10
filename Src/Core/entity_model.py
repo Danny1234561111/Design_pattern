@@ -17,9 +17,6 @@ class entity_model(abstact_model):
     @name.setter
     def name(self, value:str):
         validator.validate(value, str)
-<<<<<<< HEAD
-        self.__name = value.strip()
-=======
         self.__name = value.strip()
 
 
@@ -29,4 +26,3 @@ class entity_model(abstact_model):
         item = entity_model()
         item.name = name
         return item
->>>>>>> origin/version_teacher

@@ -8,7 +8,6 @@ import json
 from Src.Models.receipt_model import receipt_model
 from Src.Models.receipt_item_model import receipt_item_model
 
-
 class start_service:
     # Репозиторий
     __repo: reposity = reposity()
@@ -21,7 +20,7 @@ class start_service:
     __default_receipt_items = {}
 
     # Наименование файла (полный путь)
-    __full_file_name: str = ""
+    __full_file_name:str = ""
 
     def __init__(self):
         self.__repo.initalize()
@@ -30,19 +29,18 @@ class start_service:
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(start_service, cls).__new__(cls)
-        return cls.instance
+        return cls.instance 
 
-        # Текущий файл
-
+    # Текущий файл
     @property
     def file_name(self) -> str:
         return self.__full_file_name
 
     # Полный путь к файлу настроек
     @file_name.setter
-    def file_name(self, value: str):
+    def file_name(self, value:str):
         validator.validate(value, str)
-        full_file_name = os.path.abspath(value)
+        full_file_name = os.path.abspath(value)        
         if os.path.exists(full_file_name):
             self.__full_file_name = full_file_name.strip()
         else:
@@ -56,7 +54,7 @@ class start_service:
         try:
             file_name = self.__full_file_name.encode('utf-8').decode('utf-8')
             with open(file_name, 'r', encoding='utf-8') as file_instance:
-                print(self.__full_file_name)
+                print( self.__full_file_name)
                 settings = json.load(file_instance)
 
                 if "default_receipt" in settings.keys():
@@ -66,33 +64,33 @@ class start_service:
             return False
         except:
             return False
-
+        
     # TODO: Внимание! Все методы __convert можно сделать универсально
-
-    # Загрузить единицы измерений
+        
+    # Загрузить единицы измерений    
     def __convert_ranges(self, data: dict) -> bool:
         validator.validate(data, dict)
-        ranges = data['ranges'] if 'ranges' in data else []
+        ranges =     data['ranges'] if 'ranges' in data else []     
         for range in ranges:
             name = range['name'] if 'name' in range else ""
-            base_id = range['base_id'] if 'base_id' in range else ""
-            value = range['value'] if 'value' in range else 1
+            base_id =  range['base_id'] if 'base_id' in range else ""
+            value =  range['value'] if 'value' in range else 1
             id = range['id'] if 'id' in range else ""
 
             if id.strip() != "":
-                base = self.__default_receipt_items[base_id] if base_id in self.__default_receipt_items else None
+                base  = self.__default_receipt_items[base_id] if base_id in self.__default_receipt_items else None
                 item = range_model.create(name, value, base)
                 item.unique_code = id
                 self.__default_receipt_items.setdefault(id, item)
-                self.__repo.data[reposity.range_key()].append(item)
+                self.__repo.data[ reposity.range_key() ].append(item)
 
         return True
 
     # Загрузить группы номенклатуры
     def __convert_groups(self, data: dict) -> bool:
         validator.validate(data, dict)
-        categories = data['categories'] if 'categories' in data else []
-        for category in categories:
+        categories =  data['categories'] if 'categories' in data else []    
+        for category in  categories:
             name = category['name'] if 'name' in category else ""
             id = category['id'] if 'id' in category else ""
 
@@ -100,83 +98,84 @@ class start_service:
                 item = group_model.create(name)
                 item.unique_code = id
                 self.__default_receipt_items.setdefault(id, item)
-                self.__repo.data[reposity.group_key()].append(item)
+                self.__repo.data[ reposity.group_key() ].append(item)
 
         return True
 
     # Загрузить номенклатуру
-    def __convert_nomenclatures(self, data: dict) -> bool:
-        validator.validate(data, dict)
-        nomenclatures = data['nomenclatures'] if 'nomenclatures' in data else []
-        for nomenclature in nomenclatures:
+    def __convert_nomenclatures(   self, data: dict) -> bool:
+        validator.validate(data, dict)      
+        nomenclatures = data['nomenclatures'] if 'nomenclatures' in data else []   
+        for nomenclature in   nomenclatures:
             name = nomenclature['name'] if 'name' in nomenclature else ""
             id = nomenclature['id'] if 'id' in nomenclature else ""
             range_id = nomenclature['range_id'] if 'range_id' in nomenclature else ""
             category_id = nomenclature['category_id'] if 'category_id' in nomenclature else ""
 
             if id.strip() != "":
-                range = self.__default_receipt_items[range_id] if range_id in self.__default_receipt_items else None
-                category = self.__default_receipt_items[
-                    category_id] if category_id in self.__default_receipt_items else None
-                item = nomenclature_model.create(name, category, range)
+                range =  self.__default_receipt_items[range_id] if range_id in self.__default_receipt_items else None
+                category =  self.__default_receipt_items[category_id] if category_id in self.__default_receipt_items else None
+                item  = nomenclature_model.create(name, category, range)
                 item.unique_code = id
                 self.__default_receipt_items.setdefault(id, item)
-                self.__repo.data[reposity.nomenclature_key()].append(item)
+                self.__repo.data[ reposity.nomenclature_key() ].append(item)
 
-        return True
+        return True        
 
-        # TODO: Внимание! Тут нужно проверки добавить и обработку исключений чтобы возвращать False
 
-    # Обработать полученный словарь
+    # TODO: Внимание! Тут нужно проверки добавить и обработку исключений чтобы возвращать False
+
+    # Обработать полученный словарь    
     def convert(self, data: dict) -> bool:
         validator.validate(data, dict)
 
         # 1 Созданим рецепт
         cooking_time = data['cooking_time'] if 'cooking_time' in data else ""
         portions = int(data['portions']) if 'portions' in data else 0
-        name = data['name'] if 'name' in data else "НЕ ИЗВЕСТНО"
-        self.__default_receipt = receipt_model.create(name, cooking_time, portions)
+        name =  data['name'] if 'name' in data else "НЕ ИЗВЕСТНО"
+        self.__default_receipt = receipt_model.create(name, cooking_time, portions  )
 
         # Загрузим шаги приготовления
-        steps = data['steps'] if 'steps' in data else []
+        steps =  data['steps'] if 'steps' in data else []
         for step in steps:
             if step.strip() != "":
-                self.__default_receipt.steps.append(step)
+                self.__default_receipt.steps.append( step )
 
         self.__convert_ranges(data)
         self.__convert_groups(data)
-        self.__convert_nomenclatures(data)
+        self.__convert_nomenclatures(data)        
+
 
         # Собираем рецепт
-        compositions = data['composition'] if 'composition' in data else []
+        compositions =  data['composition'] if 'composition' in data else []      
         for composition in compositions:
             namnomenclature_id = composition['nomenclature_id'] if 'nomenclature_id' in composition else ""
             range_id = composition['range_id'] if 'range_id' in composition else ""
-            value = composition['value'] if 'value' in composition else ""
-            nomenclature = self.__default_receipt_items[
-                namnomenclature_id] if namnomenclature_id in self.__default_receipt_items else None
+            value  = composition['value'] if 'value' in composition else ""
+            nomenclature = self.__default_receipt_items[namnomenclature_id] if namnomenclature_id in self.__default_receipt_items else None
             range = self.__default_receipt_items[range_id] if range_id in self.__default_receipt_items else None
-            item = receipt_item_model.create(nomenclature, range, value)
+            item = receipt_item_model.create(  nomenclature, range, value)
             self.__default_receipt.composition.append(item)
-
+            
         # Сохраняем рецепт
-        self.__repo.data[reposity.receipt_key()].append(self.__default_receipt)
+        self.__repo.data[ reposity.receipt_key() ].append(self.__default_receipt)
         return True
 
     """
     Стартовый набор данных
     """
-
     @property
     def data(self):
-        return self.__repo.data
+        return self.__repo.data   
 
     """
     Основной метод для генерации эталонных данных
     """
-
     def start(self):
         self.file_name = "settings.json"
         result = self.load()
         if result == False:
             raise operation_exception("Невозможно сформировать стартовый набор данных!")
+        
+
+
