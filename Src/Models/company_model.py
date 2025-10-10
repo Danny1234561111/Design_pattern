@@ -11,6 +11,7 @@ class company_model(entity_model):
     __account:int = 0
     __ownership:str = ""
 
+<<<<<<< HEAD
     def __init__(self, inn: int = 0, bic: int = 0, corr_account: int = 0, account: int = 0,
                  ownership: str = ""):
         self.__inn = inn
@@ -19,6 +20,14 @@ class company_model(entity_model):
         self.__account = account
         self.__ownership = ownership
     # Наименование
+=======
+    # ИНН : 12 симв
+    # Счет 11 симв
+    # Корреспондентский счет 11 симв
+    # БИК 9 симв
+    # Наименование
+    # Вид собственности 5 симв
+>>>>>>> origin/version_teacher
 
     # ИНН
     @property

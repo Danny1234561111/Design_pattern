@@ -17,4 +17,16 @@ class entity_model(abstact_model):
     @name.setter
     def name(self, value:str):
         validator.validate(value, str)
+<<<<<<< HEAD
         self.__name = value.strip()
+=======
+        self.__name = value.strip()
+
+
+    # Фабричный метод
+    @staticmethod
+    def create(name:str):
+        item = entity_model()
+        item.name = name
+        return item
+>>>>>>> origin/version_teacher
