@@ -7,11 +7,9 @@ import os
 import json
 from Src.Models.receipt_model import receipt_model
 from Src.Models.receipt_item_model import receipt_item_model
-from typing import Callable, Dict, Any, List, Optional
-import logging
-
-logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
-
+from Src.Dtos.nomenclature_dto import nomenclature_dto
+from Src.Dtos.range_dto import range_dto
+from Src.Dtos.category_dto import category_dto
 
 class start_service:
     # Репозиторий
@@ -22,10 +20,10 @@ class start_service:
 
     # Словарь который содержит загруженные и инициализованные инстансы нужных объектов
     # Ключ - id записи, значение - abstract_model
-    __default_receipt_items = {}
+    __cache = {}
 
     # Наименование файла (полный путь)
-    __full_file_name: str = ""
+    __full_file_name:str = ""
 
     def __init__(self):
         self.__repo.initalize()
@@ -34,19 +32,18 @@ class start_service:
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(start_service, cls).__new__(cls)
-        return cls.instance
+        return cls.instance 
 
-        # Текущий файл
-
+    # Текущий файл
     @property
     def file_name(self) -> str:
         return self.__full_file_name
 
     # Полный путь к файлу настроек
     @file_name.setter
-    def file_name(self, value: str):
+    def file_name(self, value:str):
         validator.validate(value, str)
-        full_file_name = os.path.abspath(value)
+        full_file_name = os.path.abspath(value)        
         if os.path.exists(full_file_name):
             self.__full_file_name = full_file_name.strip()
         else:
@@ -58,9 +55,7 @@ class start_service:
             raise operation_exception("Не найден файл настроек!")
 
         try:
-            file_name = self.__full_file_name.encode('utf-8').decode('utf-8')
-            with open(file_name, 'r', encoding='utf-8') as file_instance:
-                print(self.__full_file_name)
+            with open( self.__full_file_name, 'r') as file_instance:
                 settings = json.load(file_instance)
 
                 if "default_receipt" in settings.keys():
@@ -69,184 +64,111 @@ class start_service:
 
             return False
         except Exception as e:
-            logging.error(f"Ошибка при загрузке файла: {e}")
+            error_message = str(e)
             return False
+        
+    # Сохранить элемент в репозитории
+    def __save_item(self, key:str, dto, item):
+        validator.validate(key, str)
+        item.unique_code = dto.id
+        self.__cache.setdefault(dto.id, item)
+        self.__repo.data[ key ].append(item)
 
-    # Фабрика для создания объектов модели
-    def _create_model_instance(self, model_type: str, data: Dict[str, Any]) -> Optional[Any]:
-        """Создает экземпляр объекта модели на основе типа и данных."""
-        name = data.get('name', "")
-        id = data.get('id', "")
-        if id.strip() == "":
-            return None
-
-        try:
-            if model_type == "range_model":
-                base_id = data.get('base_id', "")
-                value = data.get('value', 1)
-                base = self.__default_receipt_items.get(base_id)
-                item = range_model.create(name, value, base)
-            elif model_type == "group_model":
-                item = group_model.create(name)
-            elif model_type == "nomenclature_model":
-                range_id = data.get('range_id', "")
-                category_id = data.get('category_id', "")
-                range_item = self.__default_receipt_items.get(range_id)
-                category_item = self.__default_receipt_items.get(category_id)
-                item = nomenclature_model.create(name, category_item, range_item)
-            else:
-                raise ValueError(f"Неподдерживаемый тип модели: {model_type}")
-
-            item.unique_code = id
-            return item
-        except Exception as e:
-            logging.error(f"Ошибка при создании экземпляра {model_type}: {e}")
-            return None
-
-    def _convert_items(self, data: Dict[str, Any], key: str, model_type: str) -> bool:
-        """
-        Универсальный метод для конвертации элементов определенного типа.
-
-        Args:
-            data: Словарь с данными.
-            key: Ключ, под которым находится список элементов в data (например, 'ranges', 'categories').
-            model_type: Тип модели для создания экземпляров (например, 'range_model').
-
-        Returns:
-            True, если конвертация прошла успешно, False в случае ошибки.
-        """
-        validator.validate(data, dict)
-        items = data.get(key, [])
-        for item_data in items:
-            try:
-                item = self._create_model_instance(model_type, item_data)
-                if item:
-                    self.__default_receipt_items.setdefault(item.unique_code, item)
-                    self.__repo.data.setdefault(self.get_key(model_type), []).append(item)
-            except Exception as e:
-                logging.error(f"Ошибка при конвертации {model_type}: {e}")
-                return False
-        return True
-
-    # Загрузить единицы измерений
+    # Загрузить единицы измерений   
     def __convert_ranges(self, data: dict) -> bool:
-        return self._convert_items(data, 'ranges', 'range_model')
+        validator.validate(data, dict)
+        ranges = data['ranges'] if 'ranges' in data else []    
+        if len(ranges) == 0:
+            return False
+         
+        for range in ranges:
+            dto = range_dto().create(range)
+            item = range_model.from_dto(dto, self.__cache)
+            self.__save_item( reposity.range_key(), dto, item )
+
+        return True
 
     # Загрузить группы номенклатуры
     def __convert_groups(self, data: dict) -> bool:
-        return self._convert_items(data, 'categories', 'group_model')
+        validator.validate(data, dict)
+        categories =  data['categories'] if 'categories' in data else []    
+        if len(categories) == 0:
+            return False
+
+        for category in  categories:
+            dto = category_dto().create(category)    
+            item = group_model.from_dto(dto, self.__cache )
+            self.__save_item( reposity.group_key(), dto, item )
+
+        return True
 
     # Загрузить номенклатуру
-    def __convert_nomenclatures(self, data: dict) -> bool:
-        return self._convert_items(data, 'nomenclatures', 'nomenclature_model')
+    def __convert_nomenclatures(   self, data: dict) -> bool:
+        validator.validate(data, dict)      
+        nomenclatures = data['nomenclatures'] if 'nomenclatures' in data else []   
+        if len(nomenclatures) == 0:
+            return False
+         
+        for nomenclature in nomenclatures:
+            dto = nomenclature_dto().create(nomenclature)
+            item = nomenclature_model.from_dto(dto, self.__cache)
+            self.__save_item( reposity.nomenclature_key(), dto, item )
 
-    # Обработать полученный словарь
+        return True        
+
+
+    # Обработать полученный словарь    
     def convert(self, data: dict) -> bool:
-        """
-        Обрабатывает полученный словарь с данными рецепта, преобразует данные в объекты моделей и сохраняет их в репозитории.
-        Выполняет проверки данных и обрабатывает исключения для обеспечения стабильной работы.
-        """
         validator.validate(data, dict)
 
-        try:
-            # 1 Созданим рецепт
-            cooking_time = data.get('cooking_time', "")
-            portions = data.get('portions', 0)
-            if not isinstance(portions, int):
-                logging.error(f"Некорректный тип данных для 'portions': {portions}. Ожидается int.")
-                return False  # Возвращаем False при ошибке валидации
+        # 1 Созданим рецепт
+        cooking_time = data['cooking_time'] if 'cooking_time' in data else ""
+        portions = int(data['portions']) if 'portions' in data else 0
+        name =  data['name'] if 'name' in data else "НЕ ИЗВЕСТНО"
+        self.__default_receipt = receipt_model.create(name, cooking_time, portions  )
 
-            name = data.get('name', "НЕ ИЗВЕСТНО")
-            self.__default_receipt = receipt_model.create(name, cooking_time, portions)
+        # Загрузим шаги приготовления
+        steps =  data['steps'] if 'steps' in data else []
+        for step in steps:
+            if step.strip() != "":
+                self.__default_receipt.steps.append( step )
 
-            # Загрузим шаги приготовления
-            steps = data.get('steps', [])
-            if not isinstance(steps, list):
-                logging.error(f"Некорректный тип данных для 'steps': {steps}. Ожидается list.")
-                return False
+        self.__convert_ranges(data)
+        self.__convert_groups(data)
+        self.__convert_nomenclatures(data)        
 
-            for step in steps:
-                if not isinstance(step, str):
-                    logging.warning(f"Некорректный тип данных для шага приготовления: {step}. Ожидается str.")
-                    continue  # Пропускаем некорректный шаг
 
-                if step.strip() != "":
-                    self.__default_receipt.steps.append(step)
-
-            if not self.__convert_ranges(data):
-                logging.error("Ошибка при конвертации ranges.")
-                return False
-
-            if not self.__convert_groups(data):
-                logging.error("Ошибка при конвертации groups.")
-                return False
-
-            if not self.__convert_nomenclatures(data):
-                logging.error("Ошибка при конвертации nomenclatures.")
-                return False
-
-            # Собираем рецепт
-            compositions = data.get('composition', [])
-            if not isinstance(compositions, list):
-                logging.error(f"Некорректный тип данных для 'composition': {compositions}. Ожидается list.")
-                return False
-
-            for composition in compositions:
-                nomenclature_id = composition.get('nomenclature_id', "")
-                range_id = composition.get('range_id', "")
-                value = composition.get('value', "")
-
-                if not (nomenclature_id and range_id and value):
-                    logging.warning(
-                        f"Пропущена запись в 'composition' из-за отсутствия nomenclature_id, range_id или value: {composition}")
-                    continue
-
-                nomenclature = self.__default_receipt_items.get(nomenclature_id)
-                range_item = self.__default_receipt_items.get(range_id)
-
-                if not nomenclature or not range_item:
-                    logging.warning(
-                        f"Пропущена запись в 'composition' из-за отсутствия nomenclature или range_item. nomenclature_id: {nomenclature_id}, range_id: {range_id}")
-                    continue
-
-                item = receipt_item_model.create(nomenclature, range_item, value)
-                self.__default_receipt.composition.append(item)
-
-            # Сохраняем рецепт
-            self.__repo.data[reposity.receipt_key()].append(self.__default_receipt)
-            return True
-
-        except Exception as e:
-            logging.exception(f"Ошибка при конвертации данных: {e}")
-            return False
+        # Собираем рецепт
+        compositions =  data['composition'] if 'composition' in data else []      
+        for composition in compositions:
+            # TODO: Заменить код через Dto
+            namnomenclature_id = composition['nomenclature_id'] if 'nomenclature_id' in composition else ""
+            range_id = composition['range_id'] if 'range_id' in composition else ""
+            value  = composition['value'] if 'value' in composition else ""
+            nomenclature = self.__cache[namnomenclature_id] if namnomenclature_id in self.__cache else None
+            range = self.__cache[range_id] if range_id in self.__cache else None
+            item = receipt_item_model.create(  nomenclature, range, value)
+            self.__default_receipt.composition.append(item)
+            
+        # Сохраняем рецепт
+        self.__repo.data[ reposity.receipt_key() ].append(self.__default_receipt)
+        return True
 
     """
     Стартовый набор данных
     """
-
     @property
     def data(self):
-        return self.__repo.data
+        return self.__repo.data   
 
     """
     Основной метод для генерации эталонных данных
     """
-
     def start(self):
         self.file_name = "settings.json"
         result = self.load()
         if result == False:
             raise operation_exception("Невозможно сформировать стартовый набор данных!")
+        
 
-    def get_key(self, model_type: str) -> str:
-        if model_type == "range_model":
-            return reposity.range_key()
-        elif model_type == "group_model":
-            return reposity.group_key()
-        elif model_type == "nomenclature_model":
-            return reposity.nomenclature_key()
-        elif model_type == "receipt_model":
-            return reposity.receipt_key()
-        else:
-            raise ValueError(f"Неподдерживаемый тип модели: {model_type}")
 

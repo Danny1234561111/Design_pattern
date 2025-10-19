@@ -1,53 +1,68 @@
+from Src.Core.common import common
+
 """
 Репозиторий данных
 """
-
-from typing import Dict, List, Any
-
 class reposity:
-    __data: Dict[str, List[Any]] = {}
-
-    DEFAULT_KEYS = {
-        "range_model": [],
-        "group_model": [],
-        "nomenclature_model": [],
-        "receipt_model": []
-    }
+    __data = {}
 
     @property
-    def data(self) -> Dict[str, List[Any]]:
+    def data(self):
         return self.__data
-
+    
     """
     Ключ для единц измерений
     """
     @staticmethod
-    def range_key() -> str:
+    def range_key():
         return "range_model"
+    
 
     """
     Ключ для категорий
     """
     @staticmethod
-    def group_key() -> str:
+    def group_key():
         return "group_model"
+    
 
     """
     Ключ для номенклатуры
     """
     @staticmethod
-    def nomenclature_key() -> str:
+    def nomenclature_key():
         return "nomenclature_model"
+    
 
     """
     Ключ для рецептов
     """
     @staticmethod
-    def receipt_key() -> str:
+    def receipt_key():
         return "receipt_model"
+    
+    """
+    Получить список всех ключей
+    Источник: https://github.com/Alyona1619
+    """
+    @staticmethod
+    def keys() -> list:
+        result = []
+        methods = [method for method in dir(reposity) if
+                    callable(getattr(reposity, method)) and method.endswith('_key')]
+        for method in methods:
+            key = getattr(reposity, method)()
+            result.append(key)
 
+        return result
+
+    
     """
     Инициализация
     """
-    def initalize(self) -> None:
-        self.__data = {key: [] for key in self.DEFAULT_KEYS}
+    def initalize(self):
+        keys = reposity.keys()
+        for key in keys:
+            self.__data[ key ] = []
+    
+    

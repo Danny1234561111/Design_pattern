@@ -3,7 +3,6 @@ import unittest
 from Src.start_service import start_service
 from Src.reposity import reposity
 
-
 # Набор тестов для проверки работы статового сервиса
 class test_start(unittest.TestCase):
 
@@ -30,5 +29,26 @@ class test_start(unittest.TestCase):
         gramm =  list(filter(lambda x: x.name == "Грамм", start.data[ reposity.range_key()])) 
         kg =  list(filter(lambda x: x.name == "Киллограмм", start.data[ reposity.range_key()])) 
         assert gramm[0].unique_code == kg[0].base.unique_code
+
+
+    # Проверить метод keys класса reposity
+    def test_any_reposity_keys(self):
+        # Подготовка
+
+        # Действие
+        result = reposity.keys()
+        
+        # Проверка
+        assert len(result) > 0
+
+    # Проверить метод initalize класса reposity 
+    def test_notThrow_reposity_initialize(self):   
+        # Подготовка
+        repo = reposity()
+
+        # Действие
+        repo.initalize() 
+
+
 
         
