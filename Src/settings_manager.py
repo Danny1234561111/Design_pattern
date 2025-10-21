@@ -1,92 +1,98 @@
-from Src.Models.settings_model import settings_model
-from Src.Core.validator import argument_exception
-from Src.Core.validator import operation_exception
-from Src.Core.validator import validator
-from Src.Models.company_model import company_model
-from Src.Core.common import common
-import os
+
 import json
+import os
+from Src.Core.validator import validator
+from Src.Core.response_format import ResponseFormat
+from Src.Models.settings_model import settings_model
+from Src.Models.company_model import company_model  # Import company_model
 
-####################################################3
-# Менеджер настроек. 
-# Предназначен для управления настройками и хранения параметров приложения
+
+"""Менеджер настроек
+
+Предназначен для управления настройками и хранения параметров приложения.
+"""
 class settings_manager:
-    # Наименование файла (полный путь)
-    __full_file_name:str = ""
+    # Ссылка на экземпляр SettingsManager
+    __instance = None
 
-    # Настройки
-    __settings:settings_model = None
+    # Абсолютный путь до файла с загруженными настройками
+    __file_name: str = ""
 
-    # Singletone
-    def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(settings_manager, cls).__new__(cls)
-        return cls.instance 
-    
-    def __init__(self):
-        self.set_default()
+    # Инкапсулируемый объект настроек
+    __settings: settings_model = None  # Initialize to None
 
-    # Текущие настройки
+    def __init__(self): # Заменил init на __init__
+        self.default()
+
+    @classmethod
+    def new(cls):
+        if cls.__instance is None:
+            cls.__instance = cls() # Исправлено: создаем экземпляр класса, используя cls()
+        return cls.__instance
+
+    """Абсолютный путь к файлу с настройками"""
+    @property
+    def file_name(self) -> str:
+        return self.__file_name
+
+    @file_name.setter
+    def file_name(self, value: str):
+         # Убрал validator.is_file_exists, так как его нет.  Проверяем существование файла здесь.
+        if not os.path.isfile(value):
+            raise FileNotFoundError(f"Файл '{value}' не существует.")
+        self.__file_name = value
+
+    """Настройки с хранящейся моделью компании"""
     @property
     def settings(self) -> settings_model:
         return self.__settings
 
-    # Текущий файл
-    @property
-    def file_name(self) -> str:
-        return self.__full_file_name
+    @settings.setter
+    def settings(self, value: settings_model):
+        validator.validate(value, settings_model, "settings")
+        self.__settings = value
 
-    # Полный путь к файлу настроек
-    @file_name.setter
-    def file_name(self, value:str):
-        validator.validate(value, str)
-        full_file_name = os.path.abspath(value)        
-        if os.path.exists(full_file_name):
-            self.__full_file_name = full_file_name.strip()
-        else:
-            raise argument_exception(f'Не найден файл настроек {full_file_name}')
-
-    # Загрузить настройки из Json файла
-    def load(self) -> bool:
-        if self.__full_file_name == "":
-            raise operation_exception("Не найден файл настроек!")
-
+    """Метод загрузки файла настроек"""
+    def load(self, file_name: str) -> bool:
         try:
-            with open( self.__full_file_name, 'r') as file_instance:
-                settings = json.load(file_instance)
-
-                if "company" in settings.keys():
-                    data = settings["company"]
-                    return self.convert(data)
-
+            self.file_name = file_name # Сначала устанавливаем file_name
+            with open(self.file_name, mode='r', encoding='utf-8') as file:
+                settings = json.load(file)
+                if "company" in settings:
+                    return self.convert(settings["company"])
+                else:
+                    return False # Если нет ключа "company", то возвращаем False
+        except (FileNotFoundError, json.JSONDecodeError) as e:  # Ловим исключения
+            print(f"Ошибка при загрузке настроек: {e}")
             return False
-        except:
-            return False
-        
-    # Обработать полученный словарь    
+
+    """Метод извлечения данных компании из загруженного файла настроек"""
     def convert(self, data: dict) -> bool:
-        validator.validate(data, dict)
+        validator.is_dict(data, "data")
 
-        fields = common.get_fields(self.__settings.company)
-        matching_keys = list(filter(lambda key: key in fields, data.keys()))
+        # Поля модели компании, которые могут быть заполнены
+        company_model_fields = [
+            field for field in dir(self.settings.company)
+            if not field.startswith("_") and not field.startswith("__") #Убрал подчеркивание и для __
+        ]
+        # Ключи загруженного объекта настроек
+        matching_keys = [
+            key for key in data.keys()
+            if key in company_model_fields
+        ]
 
         try:
             for key in matching_keys:
-                setattr(self.__settings.company, key, data[key])
-        except:
-            return False        
+                setattr(self.settings.company, key, data[key])
+            return True
+        except Exception as e: # Ловим все исключения
+            print(f"Ошибка при конвертации данных компании: {e}")
+            return False
 
-        return True
-
-
-    # Параметры настроек по умолчанию
-    def set_default(self):
-        company = company_model()
-        company.name = "Рога и копыта"
-        company.inn = -1
-        
-        self.__settings = settings_model()
-        self.__settings.company = company
-
-
-
+    """Метод инициализации стандартных значений полей"""
+    def default(self):
+        self.__settings = settings_model() # create settings_model instance
+        if self.__settings.company is None: # check if company exists
+            self.__settings.company = company_model() # create company_model instance
+       # self.settings.company.name = "Default Name" # This line caused problems as attribute "name" does not exist
+       # self.settings.company.ownership = "owner"  # There is no such attribute as ownership.

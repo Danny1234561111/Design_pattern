@@ -1,17 +1,39 @@
 from Src.Core.abstract_response import abstract_response
-from Src.Logics.response_csv import response_scv
-from Src.Core.validator import operation_exception
+from Src.Logics.response_csv import response_csv
+from Src.Logics.response_md import response_md
+from Src.Logics.response_xml import response_xml
+from Src.Logics.response_json import response_json
+from Src.Core.validator import validator, operation_exception
+from Src.Models.settings_model import settings_model
+from Src.Core.response_format import ResponseFormat  # Важно импортировать Enum
+from Src.settings_manager import settings_manager
 
 class factory_entities:
     __match = {
-        "csv":  response_scv
+        ResponseFormat.CSV: response_csv,
+        ResponseFormat.MARKDOWN: response_md,
+        ResponseFormat.XML: response_xml,
+        ResponseFormat.JSON: response_json
     }
+    
+    @staticmethod
+    def create(format: str | ResponseFormat) -> abstract_response:  # Объединяем типы
+        if isinstance(format, str):
+            try:
+                format = ResponseFormat(format)
+            except ValueError:
+                raise operation_exception("Формат не верный")
 
-
-    # Получить нужный тип
-    def create(self, format:str) -> abstract_response
-        if format not in self.__match.keys():
+        if format not in factory_entities.__match.keys():
             raise operation_exception("Формат не верный")
-        
-        return self.__match[  format ]
 
+        return factory_entities.__match[format]()  # Вызываем конструктор!
+
+    @staticmethod
+    def create_default() -> abstract_response:
+        settings = settings_manager().settings  # Получаем настройки из менеджера
+        return factory_entities.create(settings.response_format)
+
+# Пример использования:
+factory = factory_entities()
+default_response = factory.create_default()  # Создание ответа по умолчанию
