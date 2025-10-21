@@ -67,10 +67,6 @@ def build_response():
 
     return {"result": factory.create(format).build(models)}
 
-# Проверка файла настроек
-if not os.path.exists(self.settings_file):
-        print(f"File does not exist: {settings_file}")
-
 # Запуск приложения
 if __name__ == '__main__':
     start_service.start(settings_file)
