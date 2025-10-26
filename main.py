@@ -1,10 +1,11 @@
 import connexion
-from flask import request
+from flask import request, jsonify  # Добавили jsonify
 from Src.Core.response_format import ResponseFormat
 from Src.Logics.factory_entities import factory_entities
 from Src.reposity import reposity  # Обратите внимание на импорт
 from Src.start_service import start_service
 from Src.settings_manager import settings_manager
+from Src.Convert.convert_factory import convert_factory
 
 # Путь к файлу настроек
 settings_file = "settings.json"
@@ -71,6 +72,19 @@ def build_response():
         return response_output, {'Content-Type': 'text/plain'}
     else:
         return response_output  # Вернуть в стандартном формате
+
+@app.route("/api/receipts", methods=['GET'])
+def GetReceipts():
+    receipts = service_instance.get_receipts()  # Получаем все рецепты
+    factory = convert_factory()
+    return jsonify(factory.Convert(receipts))  # Преобразование через фабрику конвертеров
+
+@app.route("/api/receipt/<int:id>", methods=['GET'])
+def GetReceipt(id):
+    receipt = service_instance.get_receipt(id)  # Получение конкретного чека
+    factory = convert_factory()
+    return jsonify(factory.Convert(receipt))  # Преобразование через фабрику конвертеров
+
 # Запуск приложения
 if __name__ == '__main__':
     try:
