@@ -1,11 +1,9 @@
-
 import json
 import os
 from Src.Core.validator import validator
 from Src.Core.response_format import ResponseFormat
 from Src.Models.settings_model import settings_model
-from Src.Models.company_model import company_model  # Import company_model
-
+from Src.Models.company_model import company_model
 
 """Менеджер настроек
 
@@ -21,13 +19,13 @@ class settings_manager:
     # Инкапсулируемый объект настроек
     __settings: settings_model = None  # Initialize to None
 
-    def __init__(self): # Заменил init на __init__
+    def __init__(self):
         self.default()
 
     @classmethod
     def new(cls):
         if cls.__instance is None:
-            cls.__instance = cls() # Исправлено: создаем экземпляр класса, используя cls()
+            cls.__instance = cls()
         return cls.__instance
 
     """Абсолютный путь к файлу с настройками"""
@@ -37,7 +35,6 @@ class settings_manager:
 
     @file_name.setter
     def file_name(self, value: str):
-         # Убрал validator.is_file_exists, так как его нет.  Проверяем существование файла здесь.
         if not os.path.isfile(value):
             raise FileNotFoundError(f"Файл '{value}' не существует.")
         self.__file_name = value
@@ -55,14 +52,15 @@ class settings_manager:
     """Метод загрузки файла настроек"""
     def load(self, file_name: str) -> bool:
         try:
-            self.file_name = file_name # Сначала устанавливаем file_name
+            self.file_name = file_name  # Сначала устанавливаем file_name
             with open(self.file_name, mode='r', encoding='utf-8') as file:
                 settings = json.load(file)
+                print("Настройки загружены:", settings)  # Отладка: посмотреть загруженные настройки
                 if "company" in settings:
-                    return self.convert(settings["company"])
+                    return self.convert(settings["company"])  # Теперь convert доступен
                 else:
-                    return False # Если нет ключа "company", то возвращаем False
-        except (FileNotFoundError, json.JSONDecodeError) as e:  # Ловим исключения
+                    return False  # Если нет ключа "company", то возвращаем False
+        except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Ошибка при загрузке настроек: {e}")
             return False
 
@@ -73,8 +71,9 @@ class settings_manager:
         # Поля модели компании, которые могут быть заполнены
         company_model_fields = [
             field for field in dir(self.settings.company)
-            if not field.startswith("_") and not field.startswith("__") #Убрал подчеркивание и для __
+            if not field.startswith("_") and not field.startswith("__")
         ]
+
         # Ключи загруженного объекта настроек
         matching_keys = [
             key for key in data.keys()
@@ -85,14 +84,12 @@ class settings_manager:
             for key in matching_keys:
                 setattr(self.settings.company, key, data[key])
             return True
-        except Exception as e: # Ловим все исключения
+        except Exception as e:
             print(f"Ошибка при конвертации данных компании: {e}")
             return False
 
     """Метод инициализации стандартных значений полей"""
     def default(self):
-        self.__settings = settings_model() # create settings_model instance
-        if self.__settings.company is None: # check if company exists
-            self.__settings.company = company_model() # create company_model instance
-       # self.settings.company.name = "Default Name" # This line caused problems as attribute "name" does not exist
-       # self.settings.company.ownership = "owner"  # There is no such attribute as ownership.
+        self.__settings = settings_model()
+        if self.__settings.company is None:
+            self.__settings.company = company_model()

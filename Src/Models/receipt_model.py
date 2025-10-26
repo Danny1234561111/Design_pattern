@@ -1,58 +1,58 @@
 from Src.Core.entity_model import entity_model
 from Src.Core.validator import validator
+from Src.Core.abstract_dto import abstact_dto
 
-# Модель рецепта
 class receipt_model(entity_model):
-    # Количество порций
-    __portions:int = 1
+    __portions: int = 1
+    __steps: list = []
+    __composition: list = []
+    __cooking_time: str = ""
 
-    # Шаги приготовления
-    __steps:list = []
-
-    # Состав
-    __composition:list = []
-
-    # Время приготовления
-    __cooking_time:str = ""
-
-
-    # Количество порций
     @property
     def portions(self) -> int:
         return self.__portions
-    
+
     @portions.setter
-    def portions(self, value:int):
+    def portions(self, value: int):
         validator.validate(value, int)
         self.__portions = value
 
-    # Шаги приготовления
     @property
     def steps(self) -> list:
         return self.__steps
-    
-    # Состав
+
     @property
     def composition(self) -> list:
         return self.__composition
-    
-    # Время приготовления
+
     @property
     def cooking_time(self) -> str:
         return self.__cooking_time
 
     @cooking_time.setter
-    def cooking_time(self, value:str):
+    def cooking_time(self, value: str):
         validator.validate(value, str)
         self.__cooking_time = value.strip()
 
-
-    # Фабричный метод для создания нового рецепта
-    # Состав и шаги уже созданы. Будут пустыми
     @staticmethod
-    def create(name:str,cooking_time:str, portions:int ) -> "receipt_model":
+    def create(name: str, cooking_time: str, portions: int) -> "receipt_model":
         item = receipt_model()
         item.name = name
         item.cooking_time = cooking_time
         item.portions = portions
-        return item    
+        return item
+
+    def to_dto(self) -> abstact_dto:
+        dto = abstact_dto()
+        dto.portions = self.portions
+        dto.cooking_time = self.cooking_time
+        dto.steps = self.steps
+        return dto
+
+    @classmethod
+    def from_dto(cls, dto: abstact_dto):
+        instance = cls()
+        instance.portions = dto.portions
+        instance.cooking_time = dto.cooking_time
+        instance.steps = dto.steps
+        return instance

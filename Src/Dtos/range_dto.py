@@ -25,3 +25,6 @@ class range_dto(abstact_dto):
     @value.setter
     def value(self, value):
         self.__value = value
+    def create(self, data) -> "range_dto":
+        super().create(data)  # Вызов метода родителя
+        return self

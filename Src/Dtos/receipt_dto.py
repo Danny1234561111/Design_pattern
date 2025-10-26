@@ -80,3 +80,7 @@ class receipt_dto(abstact_dto):
     def steps(self, value: List[str]):
         validator.is_list_of(value, str, "ingredient steps")
         self.__steps = value
+    def create(self, data) -> "receipt_dto":
+        super().create(data)  # Вызов метода родителя
+        return self
+    

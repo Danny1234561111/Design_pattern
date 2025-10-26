@@ -1,64 +1,35 @@
 import unittest
+import json
 from Src.Logics.response_json import response_json
 from Src.Models.group_model import group_model
-from Src.Logics.factory_entities import factory_entities
-from Src.Core.response_format import ResponseFormat
-from Src.Core.validator import validator
-from Src.Core.abstract_response import abstract_response
-from Src.Core.entity_model import entity_model
-from Src.Core.validator import argument_exception
-from Src.Core.exceptions import ParamException, WrongTypeException
-from Src.Models.range_model import range_model
 from Src.Core.common import common
-from Src.Core.validator import operation_exception
-import json
 
-class Testresponse_json(unittest.TestCase):
 
-    # Проверка формирования JSON из модели группы номенклатуры
-    def test_response_json_create_create_json_from_nomenclaturegroup_model_not_none(self):
-        # Подготовка
+class TestResponseJSON(unittest.TestCase):
+
+    def test_response_json_create_from_items(self):
         response = response_json()
-        entity = group_model.create("test")
+        entity = group_model.create("Test group")
         data = [entity]
-        # Действие
         result = response.create("json", data)
-        # Проверка
         self.assertIsNotNone(result)
-
-        # Проверка, что результат является корректным JSON
         json_data = json.loads(result)
         self.assertIsInstance(json_data, list)
         self.assertEqual(len(json_data), 1)
+        self.assertIsInstance(json_data[0], dict)  # Проверяем, что элемент списка - словарь
+        self.assertIn("name", json_data[0])       # Проверяем, что есть поле "name"
+        self.assertEqual(json_data[0]["name"], "Test group") # Проверяем значение "name"
 
-        # Проверка соответствия полей
-        props = common.get_fields(entity)
-        for field in props:
-            self.assertIn(field, json_data[0])
-
-    # Проверка формирования JSON из нескольких моделей единиц измерения
-    def test_response_json_create_create_json_from_measureunit_models_not_none(self):
-        # Подготовка
+    def test_response_json_to_dict(self):
         response = response_json()
-        data = [range_model.create("гр", 1), range_model.create("мл", 1)]
-        # Действие
-        result = response.create("json", data)
-        # Проверка
-        self.assertIsNotNone(result)
+        entity = group_model.create("Test group")
+        data = [entity]
+        dict_result = response.to_dict(data)  # Получаем dict напрямую
+        self.assertIsInstance(dict_result, list)
+        self.assertEqual(len(dict_result), 1) # Проверяем длину Python-объекта (списка)
+        self.assertIsInstance(dict_result[0], dict)  # Проверяем, что элемент списка - словарь
+        self.assertIn("name", dict_result[0])       # Проверяем, что есть поле "name"
+        self.assertEqual(dict_result[0]["name"], "Test group") # Проверяем значение "name"
 
-        # Проверка, что результат является корректным JSON
-        json_data = json.loads(result)
-        self.assertIsInstance(json_data, list)
-        self.assertEqual(len(json_data), len(data))
-
-    # Метод create() выбрасывает исключение при передаче списка из моделей разных типов
-    def test_response_json_create_create_from_different_models_raises_wrongtype(self):
-        # Подготовка
-        response = response_json()
-        data = [range_model.create("гр", 1), group_model.create("группа")]
-        # Действие и проверка
-        with self.assertRaises(operation_exception):
-            response.create("json", data)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

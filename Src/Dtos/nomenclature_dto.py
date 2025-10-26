@@ -27,3 +27,6 @@ class nomenclature_dto(abstact_dto):
     @category_id.setter
     def category_id(self, value):
         self.__category_id = value
+    def create(self, data) -> "nomenclature_dto":
+        super().create(data)  # Вызов метода родителя
+        return self

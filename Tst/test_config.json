@@ -1,0 +1,1 @@
+{"company": {"name": "\u0420\u043e\u0433\u0430 \u0438 \u043a\u043e\u043f\u044b\u0442\u0430", "inn": 123456789}, "default_receipt": {"group_model": [{"name": "Group1"}, {"name": "Group2"}], "range_model": [{"name": "Unit1"}, {"name": "Unit2"}], "nomenclature_model": [{"name": "Product1"}, {"name": "Product2"}], "receipt_model": [{"name": "Receipt1"}, {"name": "Receipt2"}]}}
