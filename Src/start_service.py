@@ -44,7 +44,6 @@ class start_service:
                     raise operation_exception("Файл конфигурации пуст.")
 
                 objects = json.loads(content)
-                print("Загруженные объекты:", objects)  # Отладка: посмотреть что загружено
 
                 # Проверка наличия ключей "company" и "default_receipt"
                 if "company" not in objects or "default_receipt" not in objects:

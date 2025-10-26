@@ -54,8 +54,6 @@ def build_response():
 
     models = service_instance._reposity.data.get(model_type, [])
     
-    print(f"Модели для '{model_type}': {models}")  # Проверяем модели
-    
     if not models:
         return {"error": f"No models found for type '{model_type}'."}, 404
 
