@@ -55,13 +55,11 @@ class settings_manager:
             self.file_name = file_name  # Сначала устанавливаем file_name
             with open(self.file_name, mode='r', encoding='utf-8') as file:
                 settings = json.load(file)
-                print("Настройки загружены:", settings)  # Отладка: посмотреть загруженные настройки
                 if "company" in settings:
                     return self.convert(settings["company"])  # Теперь convert доступен
                 else:
                     return False  # Если нет ключа "company", то возвращаем False
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"Ошибка при загрузке настроек: {e}")
             return False
 
     """Метод извлечения данных компании из загруженного файла настроек"""
@@ -85,7 +83,6 @@ class settings_manager:
                 setattr(self.settings.company, key, data[key])
             return True
         except Exception as e:
-            print(f"Ошибка при конвертации данных компании: {e}")
             return False
 
     """Метод инициализации стандартных значений полей"""
