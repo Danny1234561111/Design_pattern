@@ -5,5 +5,5 @@ from typing import Any, Dict
 
 class abstract_convertor(ABC):
     @abstractmethod
-    def Convert(self, obj: Any) -> Dict[str, Any]:
+    def convert(self, obj: Any) -> Dict[str, Any]:
         pass
