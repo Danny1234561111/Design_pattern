@@ -30,25 +30,13 @@ def obj_to_dict(object_: Any) -> dict:
     else:
         return str(object_)
 class validator:
-    
+    @staticmethod
+    def is_structure(value, arg_name: str) -> None:
+        if not isinstance(value, (dict, list, tuple)):
+            raise argument_exception(f"Аргумент '{arg_name}' должен быть словарем, списком или кортежем.")
+
     @staticmethod
     def validate(value, type_, len_=None):
-        """
-        Валидация аргумента по типу и длине.
-        
-        Args:
-            value (any): Аргумент.
-            type_ (object): Ожидаемый тип.
-            len_ (int): Максимальная длина.
-        
-        Raises:
-            argument_exception: Некорректный тип.
-            argument_exception: Пустой аргумент.
-            argument_exception: Некорректная длина аргумента.
-        
-        Returns:
-            True или исключение.
-        """
         if value is None:
             raise argument_exception("Пустой аргумент")
 
@@ -71,15 +59,6 @@ class validator:
 
     @staticmethod
     def is_file_exists(file_path: str) -> bool:
-        """
-        Проверка существования файла по заданному пути.
-
-        Args:
-            file_path (str): Путь к файлу.
-
-        Returns:
-            bool: True, если файл существует, иначе False.
-        """
         if not isinstance(file_path, str):
             raise argument_exception("Путь к файлу должен быть строкой")
         
@@ -89,4 +68,5 @@ class validator:
     def is_dict(value, arg_name: str) -> None:
         if not isinstance(value, dict):
             raise argument_exception(f"Аргумент '{arg_name}' должен быть словарем (dict)")
-
+    
+    

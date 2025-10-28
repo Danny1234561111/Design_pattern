@@ -3,7 +3,7 @@ import json
 from Src.reposity import reposity
 from Src.Models.company_model import company_model
 from Src.Core.validator import validator, argument_exception, operation_exception
-
+from Src.Models.receipt_model import ReceiptModel
 class start_service:
     __instance = None
     _reposity: reposity = reposity()
@@ -54,8 +54,11 @@ class start_service:
                     raise operation_exception("Ошибка при загрузке данных компании.")
 
                 receipt_data = objects["default_receipt"]
-                if not self.convert(receipt_data):
-                    raise operation_exception("Ошибка при загрузке данных дефолтного чека.")
+
+                # Используем метод convert у ReceiptModel
+                receipt_instance = ReceiptModel()
+                receipt_instance.convert(receipt_data)
+                self._reposity.data['receipt_model'] = receipt_instance  # Хранение модели
 
                 return True
 
@@ -67,7 +70,7 @@ class start_service:
             raise operation_exception(f"Ошибка при загрузке файла: {str(e)}")
 
     def start(self, settings_file: str):
-        """Метод для инициализации сервиса с использование файла настроек."""
+        """Метод для инициализации сервиса с использованием файла настроек."""
         self.file_name = settings_file  # Устанавливаем файл настроек
         self.load()  # Загружаем настройки
 
@@ -84,13 +87,14 @@ class start_service:
         self._reposity.data['company'] = company_instance
         return True
 
-    def convert(self, data: dict) -> bool:
-        validator.validate(data, dict)
-        
-        # Logic to convert received data structures
-        self._reposity.data['group_model'] = data.get('group_model', [])
-        self._reposity.data['range_model'] = data.get('range_model', [])
-        self._reposity.data['nomenclature_model'] = data.get('nomenclature_model', [])
-        self._reposity.data['receipt_model'] = data.get('receipt_model', [])
-        
-        return True
+    def get_receipts(self) -> list:
+        """Метод для получения всех рецептов."""
+        return self._reposity.data.get('receipt_model', [])
+
+    def get_receipt(self, receipt_id: int) -> dict:
+        """Метод для получения конкретного рецепта по его ID."""
+        receipts = self.get_receipts()
+        for receipt in receipts:
+            if receipt.id == receipt_id:  # Предположим, что в ReceiptModel есть свойство id
+                return receipt
+        raise operation_exception(f"Рецепт с ID {receipt_id} не найден.")
