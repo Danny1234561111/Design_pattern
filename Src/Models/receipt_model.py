@@ -5,6 +5,7 @@ from Src.Core.abstract_dto import abstact_dto
 
 class ReceiptModel(entity_model):
     def __init__(self):
+        super().__init__()
         self.company: Dict[str, Any] = {}  # Словарь для хранения информации о компании
         self.default_receipt: Dict[str, Any] = {}  # Словарь для хранения информации о дефолтном чеке
 

@@ -1,15 +1,13 @@
-from typing import Any, Union, Dict, List, Type
+from typing import Any, Dict, Union, Type,List
 from datetime import datetime
 from Src.Core.exceptions import ParamException
 from Src.Core.abstract_model import abstact_model
 from Src.Core.abstract_convertor import abstract_convertor
 from Src.Convert.basic_convertor import basic_convertor
 from Src.Convert.datetime_convertor import datetime_convertor
-from Src.Convert.reference_convertor import reference_convertor
-from typing import Any, Union, Dict, List, Type
-from datetime import datetime
 from Src.Convert.structure_convertor import StructureConvertor
-from Src.Core.validator import validator
+# Импортируем reference_convertor здесь
+from Src.Convert.reference_convertor import reference_convertor
 
 class FactoryConvertors:
     _converters: Dict[Type, Type[abstract_convertor]] = {
@@ -19,7 +17,7 @@ class FactoryConvertors:
         str: basic_convertor,
         type(None): basic_convertor,  # Обработка None
         datetime: datetime_convertor,
-        abstact_model: reference_convertor  # Важно: не type(AbstractModel), а сам класс AbstractModel
+        abstact_model: reference_convertor  # Теперь ссылка на reference_convertor
     }
 
     def create(self, object_: Any) -> abstract_convertor:
@@ -28,7 +26,7 @@ class FactoryConvertors:
 
         for type_, converter_class in self._converters.items():
             if isinstance(object_, type_) or type_ is type(object_):
-                return converter_class()
+                return converter_class()  # Создаем экземпляр нужного конвертера
 
         raise ParamException(
             f"Impossible to create converter from object "
@@ -36,4 +34,5 @@ class FactoryConvertors:
         )
 
     def convert(self, object_: Any) -> Union[Dict, List]:
-        return self.create(object_).convert(object_)
+        converter = self.create(object_)
+        return converter.convert(object_)

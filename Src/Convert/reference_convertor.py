@@ -1,19 +1,22 @@
+from typing import Any, Dict
 from Src.Core.abstract_convertor import abstract_convertor
 from Src.Core.common import common
-from typing import Dict, Any
-class reference_convertor(abstract_convertor):
 
-    # Формируется словарь в виде "поле класса": converter.convert(значение поля), где тип converter умеет обрабатывать тип поля.
-    def convert(self, obj: Any) -> dict: # Change type hint to Any
-        from Src.Convert.convert_factory import FactoryConvertors
-        # validator.validate(obj, abstact_reference) # Remove validation
+class reference_convertor(abstract_convertor):
+    def convert(self, obj: Any) -> Dict[str, Any]:
+        from Src.Convert.convert_factory import FactoryConvertors  # Перемещено внутрь метода
+
         factory = FactoryConvertors()
         result = {}
-        properties = common.get_fields(obj)
-        for property in properties:
-            value = getattr(obj, property)
-            # if isinstance(value, abstact_reference): # Remove this check
-            #     result[property] = self.convert(value)
-            # else:
-            result[property] = factory.convert(value)
+
+        fields = common.get_fields(obj)  # Получаем все поля с помощью get_fields
+        
+        for property in fields:  # Получаем только имена полей
+            value = getattr(obj, property, None)  # Получаем само значение поля
+            if value is None:
+                print(f"Warning: {property} has no value.")
+            else:
+                print(f"Converting property: {property} with value: {value}")
+            result[property] = factory.convert(value)  # Конвертируем значение
+
         return result

@@ -1,27 +1,16 @@
-from typing import Any, Union, Dict, List, Type, Tuple
-from datetime import datetime
-from Src.Core.exceptions import ParamException
-from Src.Core.abstract_model import abstact_model
+from typing import Any, Dict, List, Tuple, Union
 from Src.Core.abstract_convertor import abstract_convertor
-from Src.Convert.basic_convertor import basic_convertor
-from Src.Convert.datetime_convertor import datetime_convertor
-from Src.Convert.reference_convertor import reference_convertor
-from Src.Core import validator as vld
+from Src.Core.validator import validator as vld
 
+from Src.Core.exceptions import ParamException
 
-"""Конвертер структур
-
-Обрабатывает объекты, являющиеся списками, кортежами и словарями"""
 class StructureConvertor(abstract_convertor):
     """Переопределённый метод convert
 
     Получает на вход структуру и конвертирует её значения
     """
     def convert(self, object_: Union[List, Tuple, Dict]) -> Union[List, Dict]:
-        # Импорт FactoryConverters здесь для избежания циклического импорта
         from Src.Convert.convert_factory import FactoryConvertors
-        vld.validator
-
         vld.is_structure(object_, "object")
 
         factory = FactoryConvertors()  # Создаем экземпляр FactoryConverters здесь
