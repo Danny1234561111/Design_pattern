@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from Src.Core.abstract_convertor import abstract_convertor
 from Src.Core.common import common
+from Src.Core.validator import operation_exception  # Импортируем ваше исключение
 
 class reference_convertor(abstract_convertor):
     def convert(self, obj: Any) -> Dict[str, Any]:

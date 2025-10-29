@@ -1,8 +1,7 @@
 from typing import Any, Dict, List, Tuple, Union
 from Src.Core.abstract_convertor import abstract_convertor
 from Src.Core.validator import validator as vld
-
-from Src.Core.exceptions import ParamException
+from Src.Core.exceptions import ParamException, operation_exception  # Импортируем ваше исключение
 
 class StructureConvertor(abstract_convertor):
     """Переопределённый метод convert
@@ -26,4 +25,4 @@ class StructureConvertor(abstract_convertor):
                 result.append(factory.convert(item))  # Используем convert для рекурсивного вызова
             return result
         else:
-            raise ParamException(f"Unsupported structure type: {type(object_)}")
+            raise operation_exception(f"Unsupported structure type: {type(object_)}") 
