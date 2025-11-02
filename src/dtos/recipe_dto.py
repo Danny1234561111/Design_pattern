@@ -1,7 +1,7 @@
 from typing import List, Optional, Self, Union
 from src.core.validator import Validator as vld
 from src.core.abstract_dto import AbstractDto
-from src.dtos.Ingredient_dto import IngredientDto
+from src.dtos.ingredient_dto import IngredientDto
 
 
 """DTO для модели IngredientModel"""
