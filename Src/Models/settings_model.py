@@ -1,41 +1,36 @@
-# Src/Models/settings_model.py
-from Src.Models.company_model import company_model
-from Src.Core.validator import validator
-from Src.Core.response_format import ResponseFormat
+from src.core.validator import Validator as vld
+from src.core.abstract_model import AbstractModel
+from src.core.response_format import ResponseFormat
+from src.models.company_model import CompanyModel
 
-####################################### Модель настроек приложения
-class settings_model:
-    def __init__(self, company: company_model = None, response_format: ResponseFormat = ResponseFormat.JSON):
-        self.__company = None  # Инициализируем перед использованием сеттера
-        self.__response_format = None  # Инициализируем перед использованием сеттера
-        self.company = company
-        self.response_format = response_format
 
-    __company: company_model = None
+"""Модель настроек
+
+Инкапсулирует модель компании.
+"""
+class SettingsModel(AbstractModel):
+    # Ссылка на объект модели компании
+    __company: CompanyModel = None
+
+    # Формат ответов (по умолчанию JSON)
     __response_format: ResponseFormat
 
-    # Текущая организация
+    def __init__(self):
+        super().__init__()
+        self.__company = CompanyModel()
+        self.__response_format = ResponseFormat.JSON
+
+    """Поле компании"""
     @property
-    def company(self) -> company_model:
+    def company(self) -> CompanyModel:
         return self.__company
-
-    @company.setter
-    def company(self, value: company_model):
-        if value is not None:  # Проверяем, что value не None
-            validator.validate(value, company_model)
-            self.__company = value
-        else:
-            self.__company = None
-
+    
     """Поле формата ответов"""
     @property
     def response_format(self) -> ResponseFormat:
         return self.__response_format
-
+    
     @response_format.setter
     def response_format(self, value: ResponseFormat):
-        if value is not None: # Проверяем что value не None
-            validator.validate(value, ResponseFormat, "response format")
-            self.__response_format = value
-        else:
-            self.__response_format = ResponseFormat.JSON # Или какое-то значение по умолчанию
+        vld.validate(value, ResponseFormat, "response format")
+        self.__response_format = value

@@ -1,32 +1,38 @@
-from Src.Core.abstract_dto import abstact_dto
-
-# Модель номенклатуры (dto)
-# Пример
-#                "name":"Пшеничная мука",
-#                "range_id":"a33dd457-36a8-4de6-b5f1-40afa6193346",
-#                "category_id":"7f4ecdab-0f01-4216-8b72-4c91d22b8918",
-#                "id":"0c101a7e-5934-4155-83a6-d2c388fcc11a"
-
-class nomenclature_dto(abstact_dto):
-    __range_id:str = ""
-    __category_id:str = ""
+from typing import Self
+from src.core.validator import Validator as vld
+from src.core.abstract_dto import AbstractDto
 
 
+"""DTO для модели NomenclatureModel"""
+class NomenclatureDto(AbstractDto):
+    # Группа номенклатуры
+    __group: str = ""
+
+    # Единица измерения
+    __measure_unit: str = ""
+
+    def __init__(self):
+        super().__init__()
+
+    def load(self, data) -> Self:
+        return super().load(data)
+    
+    """Поле группы номенклатуры"""
     @property
-    def range_id(self) -> str:
-        return self.__range_id
-
-    @range_id.setter
-    def range_id(self, value):
-        self.__range_id = value
-
+    def group(self) -> str:
+        return self.__group
+    
+    @group.setter
+    def group(self, value: str):
+        vld.is_str(value, "group name")
+        self.__group = value
+    
+    """Поле единицы измерения"""
     @property
-    def category_id(self) -> str:
-        return self.__category_id
-
-    @category_id.setter
-    def category_id(self, value):
-        self.__category_id = value
-    def create(self, data) -> "nomenclature_dto":
-        super().create(data)  # Вызов метода родителя
-        return self
+    def measure_unit(self) -> str:
+        return self.__measure_unit
+    
+    @measure_unit.setter
+    def measure_unit(self, value: str):
+        vld.is_str(value, "measure unit name")
+        self.__measure_unit = value

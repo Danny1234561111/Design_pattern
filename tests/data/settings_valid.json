@@ -1,0 +1,11 @@
+{
+    "company": {
+        "name": "Test Company",
+        "inn": 123456789123,
+        "account": 12345678912,
+        "corr_account": 12345678912,
+        "bic": 123456789,
+        "ownership": "owner"
+    },
+    "default_response_format": "csv"
+}

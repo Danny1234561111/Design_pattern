@@ -1,7 +1,9 @@
-from enum import Enum
+from enum import Enum, auto
 
-class ResponseFormat(str, Enum):
-    CSV = "CSV"
-    MARKDOWN = "MARKDOWN"
-    XML = "XML"
-    JSON = "JSON"
+
+"""Форматы ответов"""
+class ResponseFormat(Enum):
+    CSV = auto()
+    MARKDOWN = auto()
+    JSON = auto()
+    XML = auto()

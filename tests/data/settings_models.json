@@ -1,0 +1,104 @@
+{
+    "company": {},
+    "models": {
+        "nomenclature_groups": [
+            {
+                "name": "ингредиенты"
+            }
+        ],
+        "measure_units": [
+            {
+                "name": "литр",
+                "base_unit": null,
+                "coefficient": 1
+            },
+            {
+                "name": "грамм",
+                "base_unit": null,
+                "coefficient": 1
+            },
+            {
+                "name": "штука",
+                "base_unit": null,
+                "coefficient": 1
+            },
+            {
+                "name": "килограмм",
+                "base_unit": "грамм",
+                "coefficient": 1000
+            },
+            {
+                "name": "миллилитр",
+                "base_unit": "литр",
+                "coefficient": 0.001
+            }
+        ],
+        "nomenlatures": [
+            {
+                "name": "яйца",
+                "group": "ингредиенты",
+                "measure_unit": "штука"
+            },
+            {
+                "name": "подсолнечное масло",
+                "group": "ингредиенты",
+                "measure_unit": "миллилитр"
+            },
+            {
+                "name": "молоко",
+                "group": "ингредиенты",
+                "measure_unit": "миллилитр"
+            },
+            {
+                "name": "сосиски",
+                "group": "ингредиенты",
+                "measure_unit": "штука"
+            },
+            {
+                "name": "соль",
+                "group": "ингредиенты",
+                "measure_unit": "грамм"
+            }
+        ],
+        "recipes": [
+            {
+                "name": "Омлет",
+                "description": "Простой омлет с сосиской и 3 яйцами",
+                "portions": 1,
+                "cooking_time": 15,
+                "ingredients": [
+                    {
+                        "nomenclature": "яйца",
+                        "measure_unit": "штука",
+                        "count": 3
+                    },
+                    {
+                        "nomenclature": "подсолнечное масло",
+                        "measure_unit": "миллилитр",
+                        "count": 10
+                    },
+                    {
+                        "nomenclature": "молоко",
+                        "measure_unit": "миллилитр",
+                        "count": 200
+                    },
+                    {
+                        "nomenclature": "сосиски",
+                        "measure_unit": "штука",
+                        "count": 1
+                    },
+                    {
+                        "nomenclature": "соль",
+                        "measure_unit": "грамм",
+                        "count": 5
+                    }
+                ],
+                "steps": [
+                    "Сварите сосиску",
+                    "Параллельно варке подготовьте яйца",
+                    "Пожарьте омлет"
+                ]
+            }
+        ]
+    }
+}

@@ -1,15 +1,23 @@
-# Src/Core/exceptions.py
+"""Исключение при непрохождении аргументом валидации"""
+class InvalidValueException(ValueError):
+    pass
 
+
+"""Исключение при неверном типе аргумента"""
+class WrongTypeException(TypeError):
+    pass
+
+
+"""Исключение при неверно переданном аргументе функции"""
 class ParamException(Exception):
-    """Исключение, вызываемое при некорректных параметрах."""
-    
-    def __init__(self, message):
-        super().__init__(message)
+    pass
 
 
-class WrongTypeException(ParamException):
-    """Исключение, вызываемое при неверном типе параметра."""
-    
-    def __init__(self, expected_type, actual_type):
-        message = f"Ожидался тип {expected_type}, но получен {actual_type}."
-        super().__init__(message)
+"""Исключение при нарушении логики бизнес-операции"""
+class OperationException(Exception):
+    pass
+
+
+"""Ошибка прокси"""
+class ProxyError(Exception):
+    pass

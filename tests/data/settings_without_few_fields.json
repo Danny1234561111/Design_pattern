@@ -1,0 +1,8 @@
+{
+    "company": {
+        "name": "Test Company",
+        "inn": 123456789123,
+        "account": 12345678912,
+        "ownership": "owner"
+    }
+}

@@ -1,36 +1,63 @@
-from typing import List, Any
-from Src.Core.abstract_response import abstract_response
-from Src.Core.common import common
-from Src.Core.validator import operation_exception
+from typing import Any, Dict, List, Union, Optional
+from src.core.validator import Validator as vld
+from src.core.exceptions import WrongTypeException
+from src.core.response_format import ResponseFormat
+from src.core.abstract_response import AbstractResponse
+from src.utils import obj_to_dict
 
-class response_xml(abstract_response):
-    def create(self, format: str, data: List[Any]) -> str:
-        xml_string = '<?xml version="1.0" encoding="UTF-8"?>\n<root>\n'
-        
-        for item in data:
-            xml_string += "  <item>\n"
-            fields = common.get_fields(item)  # Получаем поля из текущего элемента
-            for field in fields:
-                # Используем метод get для словарей, проверяем тип данных
-                value = item.get(field, '') if isinstance(item, dict) else getattr(item, field, '')
-                xml_string += f"    <{field}>{str(value)}</{field}>\n"
-            xml_string += "  </item>\n"
 
-        xml_string += "</root>\n"
-        return xml_string  # Возвращаем сформированный XML
-    def to_dict(self, data: List[Any]) -> List[dict]:
-        if not data:
-            return []
+"""Класс для формирования ответа в формате XML"""
+class ResponseXml(AbstractResponse):
+    
+    def __init__(self):
+        super().__init__()
+    
+    def build(self, data: List[Any]) -> str:
+        super().build(data, ResponseFormat.XML)
 
-        result = []
-        # Получаем поля из первого элемента для создания словарей
-        fields = common.get_fields(data[0])
-        
-        for item in data:
-            item_dict = {}
-            for field in fields:
-                # Заполняем словарь значениями
-                item_dict[field] = str(item.get(field, '') if isinstance(item, dict) else getattr(item, field, ''))
-            result.append(item_dict)
-        
-        return result
+        xml_head = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+        json = obj_to_dict(data)
+        if len(json) == 1:
+            json = json[0]
+
+        return xml_head + "\n" + self.tag("root", json)
+
+    """Возвращает XML тег"""
+    def tag(
+        self,
+        name: str,
+        content: Union[Dict, List, bool, int, float, str, None],
+        list_name: Optional[str] = None,
+    ) -> str:
+        content = (self.get_content(content, list_name)
+                   if content is not None
+                   else "")
+        return f"<{name}>{content}</{name}>"
+
+    """Формирует из переданного объекта вложенный XML тег или строку"""
+    def get_content(
+        self,
+        data: Union[Dict, List, bool, int, float, str],
+        list_name: Optional[str] = None,
+    ) -> str:
+        if type(data) in [bool, int, float, str]:
+            return str(data).strip()
+        elif type(data) is dict:
+            return "".join([self.tag(k, v, k) for k, v in data.items()])
+        elif type(data) is list:
+            item_name = self.get_list_item_name(list_name)
+            return "".join([self.tag(item_name or f"{i}", item)
+                            for i, item in enumerate(data)])
+        else:
+            raise WrongTypeException(
+                f"Type of data must be in [Dict, List, bool, int, float, "
+                f"str], but it's '{type(data).__name__}'"
+            )
+    
+    """Возвращает имя элемента списка на основании названия списка"""
+    def get_list_item_name(self, list_name: Optional[str]) -> Optional[str]:
+        if list_name is None:
+            return None
+        return (list_name[:-1]
+                if list_name.endswith("s") and len(list_name) > 1
+                else list_name)

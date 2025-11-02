@@ -1,10 +1,10 @@
 from typing import Self
-from Src.Core.validator import validator
-from Src.Core.abstract_dto import abstact_dto
+from src.core.validator import Validator as vld
+from src.core.abstract_dto import AbstractDto
 
 
 """DTO для модели IngredientModel"""
-class IngredientDto(abstact_dto):
+class IngredientDto(AbstractDto):
     # Номенклатура
     __nomenclature: str
 
@@ -27,7 +27,7 @@ class IngredientDto(abstact_dto):
     
     @nomenclature.setter
     def nomenclature(self, value: str):
-        validator.is_str(value, "nomenclature")
+        vld.is_str(value, "nomenclature")
         self.__nomenclature = value
     
     """Поле единицы измерения"""
@@ -37,7 +37,7 @@ class IngredientDto(abstact_dto):
     
     @measure_unit.setter
     def measure_unit(self, value: str):
-        validator.is_str(value, "measure_unit")
+        vld.is_str(value, "measure_unit")
         self.__measure_unit = value
     
     """Поле количества ингредиента"""
@@ -47,5 +47,5 @@ class IngredientDto(abstact_dto):
     
     @count.setter
     def count(self, value: int):
-        validator.is_int(value, "count")
+        vld.is_int(value, "count")
         self.__count = value

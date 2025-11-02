@@ -1,21 +1,9 @@
-from Src.Core.entity_model import entity_model
-from Src.Core.validator import validator
+from src.core.abstract_model import AbstractModel
 
 
-"""
-Модель склада
-"""
-class storage_model(entity_model):
-    __address:str = ""
+"""Модель склада"""
+class StorageModel(AbstractModel):
+    # Наименование (наследуется от AbstractModel)
 
-    """
-    Адрес
-    """
-    @property
-    def address(self) -> str:
-        return self.__address.strip()
-    
-    @address.setter
-    def address(self, value:str):
-        validator.validate(value, str)
-        self.__address = value.strip()
+    def __init__(self):
+        super().__init__()

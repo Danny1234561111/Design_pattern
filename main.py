@@ -1,99 +1,100 @@
-import connexion
-from flask import request, jsonify
-from Src.Core.response_format import ResponseFormat
-from Src.Logics.factory_entities import factory_entities
-from Src.reposity import reposity
-from Src.start_service import start_service
-from Src.settings_manager import settings_manager
-from Src.Convert.convert_factory import FactoryConvertors
-from Src.Core.validator import argument_exception, operation_exception, validator
-from enum import Enum
-from typing import List, Any
+import uvicorn
+from fastapi import FastAPI
 
-name = "responses"
-settings_file = "settings.json"
+from src.core.response_format import ResponseFormat
+from src.core.http_responses import (TextResponse, JsonResponse, ErrorResponse,
+                                     FormatResponse)
+from src.logics.factory_entities import FactoryEntities
+from src.logics.factory_converters import FactoryConverters
+from src.singletons.repository import Repository
+from src.singletons.start_service import StartService
+from src.singletons.settings_manager import SettingsManager
 
-service_instance = start_service()
-settings_manager_instance = settings_manager()
-reposity_instance = reposity()
 
-app = connexion.FlaskApp(name)
+settings_file = "data/settings.json"
+start_service = StartService()
+settings_manager = SettingsManager()
+factory_entities = FactoryEntities()
+factory_converters = FactoryConverters()
 
-@app.route("/api/status", methods=['GET'])
+app = FastAPI()
+
+
+@app.get("/api/status")
 def status():
-    return {"status": "success"}
+    """Проверить доступность REST API"""
+    return TextResponse("success")
 
-@app.route("/api/responses/formats", methods=['GET'])
+
+@app.get("/api/responses/formats")
 def get_response_formats():
-    return [format.name.lower() for format in ResponseFormat]
+    """Доступные форматы ответов"""
+    content = [format.name.lower() for format in ResponseFormat]
+    return JsonResponse(content)
 
-@app.route("/api/responses/models", methods=['GET'])
+
+@app.get("/api/responses/models")
 def get_response_models():
-    return [key for key in reposity_instance.keys()]
+    """Типы моделей, доступные для формирования ответов"""
+    content = [key for key in Repository.keys()]
+    return JsonResponse(content)
 
-@app.route("/api/responses/build", methods=['GET'])
-def build_response():
-    format_param = request.args.get('format', '').lower()
-    try:
-        validator.validate(format_param, str)
-    except argument_exception as e:
-        return {"error": str(e)}, 400
 
-    try:
-        format_enum = ResponseFormat[format_param.upper()]
-    except KeyError:
-        return {
-            "error": f"Not such format '{format_param}'. Available: {get_response_formats()}"
-        }, 400
+@app.get("/api/responses/build")
+def build_response(format: str, model: str):
+    """
+    Сформировать ответ для моделей в переданном формате:
+    - `format`: строковое обозначение формата ответа
+    - `model`: строковое обозначения типа моделей
+    """
+    formats = [format.name.lower() for format in ResponseFormat]
+    if format is None:
+        return ErrorResponse("param 'format' must be transmitted")
+    format = format.lower()
+    if format not in formats:
+        return ErrorResponse(
+            f"not such format '{format}'. Available: {formats}"
+        )
+    
+    model_types = [key for key in Repository.keys()]
+    if model is None:
+        return ErrorResponse("param 'model' must be transmitted")
+    if model not in model_types:
+        return ErrorResponse(
+            f"not such model '{model}'. Available: {model_types}"
+        )
 
-    model_type = request.args.get('model')
-    try:
-        validator.validate(model_type, str)
-    except argument_exception as e:
-        return {"error": str(e)}, 400
+    models = list(start_service.repository.data[model].values())
+    result = factory_entities.create(format).build(models)
 
-    if model_type not in get_response_models():
-        return {
-            "error": f"Not such model '{model_type}'. Available: {get_response_models()}"
-        }, 400
+    return FormatResponse(result, format)
 
-    models = service_instance._reposity.data.get(model_type, [])
-    if not models:
-        return {"error": f"No models found for type '{model_type}'."}, 404
-    try:
-        factory = FactoryConvertors()
-        converted_models = factory.convert(models)
-        response_output = factory_entities.create_response(format_enum, converted_models)
 
-        if format_enum == ResponseFormat.JSON:
-            return jsonify(response_output), 200
-        elif format_enum == ResponseFormat.CSV:
-            return response_output, {'Content-Type': 'text/csv'}
-        elif format_enum == ResponseFormat.MARKDOWN:
-            return response_output, {'Content-Type': 'text/markdown'}
-        elif format_enum == ResponseFormat.XML:
-            return response_output, {'Content-Type': 'text/plain'}
-        else:
-            return response_output
-    except (argument_exception, operation_exception) as e:
-        return {"error": str(e)}, 500
+@app.get("/api/recipes")
+def get_recipes():
+    """Получить список рецептов в формате JSON"""
+    key = Repository.recipes_key
+    recipes = list(start_service.repository.data[key].values())
+    result = factory_converters.convert(recipes)
 
-@app.route("/api/receipts", methods=['GET'])
-def GetReceipts():
-    receipts = service_instance.get_receipts()  # Получаем все рецепты
-    factory = FactoryConvertors()
-    return jsonify(factory.convert(receipts))  # Преобразование через фабрику конвертеров
+    return JsonResponse(result)
 
-@app.route("/api/receipt/<int:id>", methods=['GET'])
-def GetReceipt(id):
-    receipt = service_instance.get_receipt(id)  # Получение конкретного чека
-    factory = FactoryConvertors()
-    return jsonify(factory.convert(receipt))  # Преобразование через фабрику конвертеров
 
-if __name__ == '__main__':
-    try:
-        settings_manager_instance.load(settings_file)
-        service_instance.start(settings_file)
-        app.run(host="localhost", port=8080)
-    except Exception as e:
-        print(f"Ошибка при запуске приложения: {str(e)}")
+@app.get("/api/recipes/{unique_code}")
+def get_recipe(unique_code: str):
+    """
+    Получить рецепт в формате JSON по его уникальному коду:
+    - `unique_code`: уникальный код рецепта в хранилище
+    """
+    recipe = start_service.repository.get(unique_code=unique_code)
+    result = factory_converters.convert(recipe)
+
+    return JsonResponse(result)
+
+
+if __name__ == "__main__":
+    settings_manager.load(settings_file)
+    start_service.start(settings_file)
+    uvicorn.run(app=app,
+                host="localhost",
+                port=8080)
