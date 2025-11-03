@@ -10,6 +10,10 @@ from src.models.recipe_model import RecipeModel
 from src.models.measure_unit_model import MeasureUnitModel
 from src.models.nomenclature_model import NomenclatureModel
 from src.models.nomenclature_group_model import NomenclatureGroupModel
+from src.models.transaction_model import TransactionModel
+from src.dtos.transaction_dto import TransactionDto
+from src.dtos.storage_dto import StorageDto
+from src.models.storage_model import StorageModel
 from src.singletons.repository import Repository
 
 
@@ -65,6 +69,12 @@ class StartService:
     @property
     def nomenclatures(self) -> Dict[str, NomenclatureModel]:
         return self.data[Repository.nomenclatures_key]
+    @property
+    def storages(self) -> Dict[str, StorageModel]:
+        return self.data[Repository.storages_key]
+    @property
+    def transactions(self) -> Dict[str, TransactionModel]:
+        return self.data[Repository.transactions_key]
 
     """Метод загрузки эталонных моделей и рецептов из файла настроек"""
     def load(self) -> bool:
@@ -153,7 +163,25 @@ class StartService:
             dto_type=RecipeDto,
             model_type=RecipeModel
         )
+        """Метод конвертации объекта в модели транзакций"""
+    def __convert_transactions(self, data: dict) -> bool:
+        return self.__convert_models(
+            data=data,
+            data_key="transactions",
+            repo_key=Repository.transactions_key, 
+            dto_type=TransactionDto, 
+            model_type=TransactionModel  
+        )
     
+    """Метод конвертации объекта в модели складов"""
+    def __convert_storages(self, data: dict) -> bool:
+        return self.__convert_models(
+            data=data,
+            data_key="storages",
+            repo_key=Repository.storages_key,
+            dto_type=StorageDto,
+            model_type=StorageModel 
+        )
     """Метод конвертации объекта в модели"""
     def convert(self, data: dict) -> bool:
         vld.is_dict(data, "data")
@@ -161,6 +189,9 @@ class StartService:
         self.__convert_measure_units(data)
         self.__convert_nomenlatures(data)
         self.__convert_recipes(data)
+        
+        self.__convert_storages(data) 
+        self.__convert_transactions(data)  
     
     """Метод вызова методов генерации эталонных данных"""
     def start(self, file_name: str):

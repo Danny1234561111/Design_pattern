@@ -51,11 +51,14 @@ class SettingsManager:
             with open(self.file_name, mode='r', encoding='utf-8') as file:
                 settings = json.load(file)
                 self.convert_company_data(settings["company"])
-                self.convert_response_format(
-                    settings["default_response_format"]
-                )
+                self.convert_response_format(settings["default_response_format"])
+
+                # Проверяем, нужно ли загружать данные при первом старте
+                if settings.get("first_start", False):
+                    pass
+
                 return True
-        except:
+        except Exception as e:
             return False
     
     """Метод извлечения данных компании из загуженного файла настроек"""
