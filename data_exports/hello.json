@@ -1,0 +1,662 @@
+{
+    "measure_units": {
+        "литр": {
+            "base_unit": null,
+            "coefficient": 1.0,
+            "name": "литр",
+            "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+        },
+        "грамм": {
+            "base_unit": null,
+            "coefficient": 1.0,
+            "name": "грамм",
+            "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+        },
+        "штука": {
+            "base_unit": null,
+            "coefficient": 1.0,
+            "name": "штука",
+            "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+        },
+        "килограмм": {
+            "base_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "грамм",
+                "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+            },
+            "coefficient": 1000.0,
+            "name": "килограмм",
+            "unique_code": "824f8686522b4a9a8955898f59d38000"
+        },
+        "миллилитр": {
+            "base_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "литр",
+                "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+            },
+            "coefficient": 0.001,
+            "name": "миллилитр",
+            "unique_code": "54c9003b8b444ed48397758777c3a690"
+        }
+    },
+    "nomenclature_groups": {
+        "ингредиенты": {
+            "name": "ингредиенты",
+            "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+        }
+    },
+    "nomenclatures": {
+        "яйца": {
+            "group": {
+                "name": "ингредиенты",
+                "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+            },
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "штука",
+                "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+            },
+            "name": "яйца",
+            "unique_code": "de2d5808f6f54779b940675438e2f6e7"
+        },
+        "подсолнечное масло": {
+            "group": {
+                "name": "ингредиенты",
+                "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+            },
+            "measure_unit": {
+                "base_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "литр",
+                    "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                },
+                "coefficient": 0.001,
+                "name": "миллилитр",
+                "unique_code": "54c9003b8b444ed48397758777c3a690"
+            },
+            "name": "подсолнечное масло",
+            "unique_code": "178bcadc1ab640a3a0b0b08d1d81c27a"
+        },
+        "молоко": {
+            "group": {
+                "name": "ингредиенты",
+                "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+            },
+            "measure_unit": {
+                "base_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "литр",
+                    "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                },
+                "coefficient": 0.001,
+                "name": "миллилитр",
+                "unique_code": "54c9003b8b444ed48397758777c3a690"
+            },
+            "name": "молоко",
+            "unique_code": "edc84a02d98f4bb8b4cc96c78644405b"
+        },
+        "сосиски": {
+            "group": {
+                "name": "ингредиенты",
+                "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+            },
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "штука",
+                "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+            },
+            "name": "сосиски",
+            "unique_code": "bbef85b5ebf74abe96f394e5c7876c21"
+        },
+        "соль": {
+            "group": {
+                "name": "ингредиенты",
+                "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+            },
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "грамм",
+                "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+            },
+            "name": "соль",
+            "unique_code": "4a40eda5385047ceab4f09d05962c9ac"
+        }
+    },
+    "recipes": {
+        "Омлет": {
+            "cooking_time": 15,
+            "description": "Простой омлет с сосиской и 3 яйцами",
+            "ingredients": [
+                {
+                    "count": 3,
+                    "measure_unit": {
+                        "base_unit": null,
+                        "coefficient": 1.0,
+                        "name": "штука",
+                        "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                    },
+                    "name": "ингредиент 'яйца'",
+                    "nomenclature": {
+                        "group": {
+                            "name": "ингредиенты",
+                            "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                        },
+                        "measure_unit": {
+                            "base_unit": null,
+                            "coefficient": 1.0,
+                            "name": "штука",
+                            "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                        },
+                        "name": "яйца",
+                        "unique_code": "de2d5808f6f54779b940675438e2f6e7"
+                    },
+                    "unique_code": "2514a0b4303c4e0e95bc631f6e38348e"
+                },
+                {
+                    "count": 10,
+                    "measure_unit": {
+                        "base_unit": {
+                            "base_unit": null,
+                            "coefficient": 1.0,
+                            "name": "литр",
+                            "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                        },
+                        "coefficient": 0.001,
+                        "name": "миллилитр",
+                        "unique_code": "54c9003b8b444ed48397758777c3a690"
+                    },
+                    "name": "ингредиент 'подсолнечное масло'",
+                    "nomenclature": {
+                        "group": {
+                            "name": "ингредиенты",
+                            "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                        },
+                        "measure_unit": {
+                            "base_unit": {
+                                "base_unit": null,
+                                "coefficient": 1.0,
+                                "name": "литр",
+                                "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                            },
+                            "coefficient": 0.001,
+                            "name": "миллилитр",
+                            "unique_code": "54c9003b8b444ed48397758777c3a690"
+                        },
+                        "name": "подсолнечное масло",
+                        "unique_code": "178bcadc1ab640a3a0b0b08d1d81c27a"
+                    },
+                    "unique_code": "e7376ae277d0426185055009538f2e83"
+                },
+                {
+                    "count": 200,
+                    "measure_unit": {
+                        "base_unit": {
+                            "base_unit": null,
+                            "coefficient": 1.0,
+                            "name": "литр",
+                            "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                        },
+                        "coefficient": 0.001,
+                        "name": "миллилитр",
+                        "unique_code": "54c9003b8b444ed48397758777c3a690"
+                    },
+                    "name": "ингредиент 'молоко'",
+                    "nomenclature": {
+                        "group": {
+                            "name": "ингредиенты",
+                            "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                        },
+                        "measure_unit": {
+                            "base_unit": {
+                                "base_unit": null,
+                                "coefficient": 1.0,
+                                "name": "литр",
+                                "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                            },
+                            "coefficient": 0.001,
+                            "name": "миллилитр",
+                            "unique_code": "54c9003b8b444ed48397758777c3a690"
+                        },
+                        "name": "молоко",
+                        "unique_code": "edc84a02d98f4bb8b4cc96c78644405b"
+                    },
+                    "unique_code": "55e72cebaff441fc8fe0fa9364adf59f"
+                },
+                {
+                    "count": 1,
+                    "measure_unit": {
+                        "base_unit": null,
+                        "coefficient": 1.0,
+                        "name": "штука",
+                        "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                    },
+                    "name": "ингредиент 'сосиски'",
+                    "nomenclature": {
+                        "group": {
+                            "name": "ингредиенты",
+                            "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                        },
+                        "measure_unit": {
+                            "base_unit": null,
+                            "coefficient": 1.0,
+                            "name": "штука",
+                            "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                        },
+                        "name": "сосиски",
+                        "unique_code": "bbef85b5ebf74abe96f394e5c7876c21"
+                    },
+                    "unique_code": "ff250c8e0eaa4dad9d97c70f71761c4e"
+                },
+                {
+                    "count": 5,
+                    "measure_unit": {
+                        "base_unit": null,
+                        "coefficient": 1.0,
+                        "name": "грамм",
+                        "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+                    },
+                    "name": "ингредиент 'соль'",
+                    "nomenclature": {
+                        "group": {
+                            "name": "ингредиенты",
+                            "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                        },
+                        "measure_unit": {
+                            "base_unit": null,
+                            "coefficient": 1.0,
+                            "name": "грамм",
+                            "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+                        },
+                        "name": "соль",
+                        "unique_code": "4a40eda5385047ceab4f09d05962c9ac"
+                    },
+                    "unique_code": "a2be1bb369f142b3960f1c78ffeb0b2a"
+                }
+            ],
+            "name": "Омлет",
+            "portions": 1,
+            "steps": [
+                "Сварите сосиску",
+                "Параллельно варке подготовьте яйца",
+                "Пожарьте омлет"
+            ],
+            "unique_code": "b62125d0979445c98a4df9abfb767474"
+        }
+    },
+    "storages": {
+        "Главный склад": {
+            "address": "Главный склад",
+            "name": "Главный склад",
+            "unique_code": "0e2d63b2828a42388acbc411c911c677"
+        },
+        "Второй склад": {
+            "address": "Второй склад",
+            "name": "Второй склад",
+            "unique_code": "4363dddf9c19411aa43549c436586e5f"
+        }
+    },
+    "transactions": {
+        "транзакция_1": {
+            "date": "2025-01-01 00:00:00",
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "штука",
+                "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+            },
+            "name": "транзакция_1",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "штука",
+                    "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                },
+                "name": "сосиски",
+                "unique_code": "bbef85b5ebf74abe96f394e5c7876c21"
+            },
+            "quantity": 15,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "51f0bf93a0bd42dfaeacbfaf6e8e643e",
+            "unique_number": "транзакция_1"
+        },
+        "транзакция_2": {
+            "date": "2025-01-01 00:00:00",
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "штука",
+                "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+            },
+            "name": "транзакция_2",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "штука",
+                    "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                },
+                "name": "яйца",
+                "unique_code": "de2d5808f6f54779b940675438e2f6e7"
+            },
+            "quantity": 8,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "73e16ba668854358837c0b1fde6ab79b",
+            "unique_number": "транзакция_2"
+        },
+        "транзакция_3": {
+            "date": "2025-01-01 00:00:00",
+            "measure_unit": {
+                "base_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "грамм",
+                    "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+                },
+                "coefficient": 1000.0,
+                "name": "килограмм",
+                "unique_code": "824f8686522b4a9a8955898f59d38000"
+            },
+            "name": "транзакция_3",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "грамм",
+                    "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+                },
+                "name": "соль",
+                "unique_code": "4a40eda5385047ceab4f09d05962c9ac"
+            },
+            "quantity": 10,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "fc8b2384ba674f31902a0f1d6b4f93c7",
+            "unique_number": "транзакция_3"
+        },
+        "транзакция_4": {
+            "date": "2025-01-01 00:00:00",
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "литр",
+                "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+            },
+            "name": "транзакция_4",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": {
+                        "base_unit": null,
+                        "coefficient": 1.0,
+                        "name": "литр",
+                        "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                    },
+                    "coefficient": 0.001,
+                    "name": "миллилитр",
+                    "unique_code": "54c9003b8b444ed48397758777c3a690"
+                },
+                "name": "молоко",
+                "unique_code": "edc84a02d98f4bb8b4cc96c78644405b"
+            },
+            "quantity": 3,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "576bc7169fdb4572aea1a8f4ec536eb5",
+            "unique_number": "транзакция_4"
+        },
+        "транзакция_5": {
+            "date": "2025-01-15 00:00:00",
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "штука",
+                "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+            },
+            "name": "транзакция_5",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "штука",
+                    "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                },
+                "name": "сосиски",
+                "unique_code": "bbef85b5ebf74abe96f394e5c7876c21"
+            },
+            "quantity": -3,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "703cf4c8e0e642cc887883b29b7d79a7",
+            "unique_number": "транзакция_5"
+        },
+        "транзакция_6": {
+            "date": "2025-01-18 00:00:00",
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "штука",
+                "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+            },
+            "name": "транзакция_6",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "штука",
+                    "unique_code": "474cfd62e7d3412893a42766cb7adc57"
+                },
+                "name": "сосиски",
+                "unique_code": "bbef85b5ebf74abe96f394e5c7876c21"
+            },
+            "quantity": -2,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "3e6ededc10d44e8c879263de526aa464",
+            "unique_number": "транзакция_6"
+        },
+        "транзакция_7": {
+            "date": "2025-01-03 00:00:00",
+            "measure_unit": {
+                "base_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "литр",
+                    "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                },
+                "coefficient": 0.001,
+                "name": "миллилитр",
+                "unique_code": "54c9003b8b444ed48397758777c3a690"
+            },
+            "name": "транзакция_7",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": {
+                        "base_unit": null,
+                        "coefficient": 1.0,
+                        "name": "литр",
+                        "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                    },
+                    "coefficient": 0.001,
+                    "name": "миллилитр",
+                    "unique_code": "54c9003b8b444ed48397758777c3a690"
+                },
+                "name": "молоко",
+                "unique_code": "edc84a02d98f4bb8b4cc96c78644405b"
+            },
+            "quantity": -500,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "f1d4aab834804e8e888bc8a3ac5313eb",
+            "unique_number": "транзакция_7"
+        },
+        "транзакция_8": {
+            "date": "2025-01-14 00:00:00",
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "грамм",
+                "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+            },
+            "name": "транзакция_8",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "грамм",
+                    "unique_code": "eed2062cb16846cfb219d05d6fee4086"
+                },
+                "name": "соль",
+                "unique_code": "4a40eda5385047ceab4f09d05962c9ac"
+            },
+            "quantity": -200,
+            "storage": {
+                "address": "Главный склад",
+                "name": "Главный склад",
+                "unique_code": "0e2d63b2828a42388acbc411c911c677"
+            },
+            "unique_code": "4584ab4d9d024e949e3561587717833c",
+            "unique_number": "транзакция_8"
+        },
+        "транзакция_9": {
+            "date": "2025-02-01 00:00:00",
+            "measure_unit": {
+                "base_unit": null,
+                "coefficient": 1.0,
+                "name": "литр",
+                "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+            },
+            "name": "транзакция_9",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": {
+                        "base_unit": null,
+                        "coefficient": 1.0,
+                        "name": "литр",
+                        "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                    },
+                    "coefficient": 0.001,
+                    "name": "миллилитр",
+                    "unique_code": "54c9003b8b444ed48397758777c3a690"
+                },
+                "name": "подсолнечное масло",
+                "unique_code": "178bcadc1ab640a3a0b0b08d1d81c27a"
+            },
+            "quantity": 1,
+            "storage": {
+                "address": "Второй склад",
+                "name": "Второй склад",
+                "unique_code": "4363dddf9c19411aa43549c436586e5f"
+            },
+            "unique_code": "bb01e08e3ce24635a3ddcad8e7d53bb1",
+            "unique_number": "транзакция_9"
+        },
+        "транзакция_10": {
+            "date": "2025-02-02 00:00:00",
+            "measure_unit": {
+                "base_unit": {
+                    "base_unit": null,
+                    "coefficient": 1.0,
+                    "name": "литр",
+                    "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                },
+                "coefficient": 0.001,
+                "name": "миллилитр",
+                "unique_code": "54c9003b8b444ed48397758777c3a690"
+            },
+            "name": "транзакция_10",
+            "nomenclature": {
+                "group": {
+                    "name": "ингредиенты",
+                    "unique_code": "3a26b7f07a634a58aadb5bae1838bc2e"
+                },
+                "measure_unit": {
+                    "base_unit": {
+                        "base_unit": null,
+                        "coefficient": 1.0,
+                        "name": "литр",
+                        "unique_code": "c90dbc3ed070417fb82ae903752b8075"
+                    },
+                    "coefficient": 0.001,
+                    "name": "миллилитр",
+                    "unique_code": "54c9003b8b444ed48397758777c3a690"
+                },
+                "name": "подсолнечное масло",
+                "unique_code": "178bcadc1ab640a3a0b0b08d1d81c27a"
+            },
+            "quantity": -1500,
+            "storage": {
+                "address": "Второй склад",
+                "name": "Второй склад",
+                "unique_code": "4363dddf9c19411aa43549c436586e5f"
+            },
+            "unique_code": "88f69e643dcf4736976b97199c54dcdb",
+            "unique_number": "транзакция_10"
+        }
+    }
+}

@@ -8,6 +8,8 @@
         "ownership": "owner"
     },
     "default_response_format": "json",
+    "first_start": true,
+    "datetime_format": "%Y-%m-%d",
     "models": {
         "nomenclature_groups": [
             {
@@ -106,6 +108,108 @@
                     "Параллельно варке подготовьте яйца",
                     "Пожарьте омлет"
                 ]
+            }
+        ],
+        "storages": [
+            {
+                "name": "Главный склад",
+                "address": "г. Иркутск, район Свердловский, ул. Первая, д. 2"
+            },
+            {
+                "name": "Второй склад",
+                "address": "г. Иркутск, район Октябрьский, ул. Десятая, д. 1"
+            }            
+        ],
+        "transactions": [
+            {
+                "name": "транзакция_1",  
+                "datetime": "2025-01-01",
+                "nomenclature_name": "сосиски",
+                "storage_name": "Главный склад",
+                "count": 15,
+                "measure_unit_name": "штука"
+                
+            },
+            {
+                "name": "транзакция_2",
+                "datetime": "2025-01-01",
+                "nomenclature_name": "яйца",
+                "storage_name": "Главный склад",
+                "count": 8,
+                "measure_unit_name": "штука"
+                
+            },
+            {
+                "name": "транзакция_3",
+                "datetime": "2025-01-01",
+                "nomenclature_name": "соль",
+                "storage_name": "Главный склад",
+                "count": 10,
+                "measure_unit_name": "килограмм"
+                
+            },
+            {
+                "name": "транзакция_4",
+                "datetime": "2025-01-01",
+                "nomenclature_name": "молоко",
+                "storage_name": "Главный склад",
+                "count": 3,
+                "measure_unit_name": "литр"
+                
+            },
+            {
+                "name": "транзакция_5",
+                "datetime": "2025-01-15",
+                "nomenclature_name": "сосиски",
+                "storage_name": "Главный склад",
+                "count": -3,
+                "measure_unit_name": "штука"
+                
+            },
+            {
+                "name": "транзакция_6",
+                "datetime": "2025-01-18",
+                "nomenclature_name": "сосиски",
+                "storage_name": "Главный склад",
+                "count": -2,
+                "measure_unit_name": "штука"
+                
+            },
+            {
+                "name": "транзакция_7",
+                "datetime": "2025-01-03",
+                "nomenclature_name": "молоко",
+                "storage_name": "Главный склад",
+                "count": -500,
+                "measure_unit_name": "миллилитр"
+                
+            },
+            {
+                "name": "транзакция_8",
+                "datetime": "2025-01-14",
+                "nomenclature_name": "соль",
+                "storage_name": "Главный склад",
+                "count": -200,
+                "measure_unit_name": "грамм"
+                
+            },
+            {
+                "name": "транзакция_9",
+                "datetime": "2025-02-01",
+                "nomenclature_name": "подсолнечное масло",
+                "storage_name": "Второй склад",
+                "count": 1,
+                "measure_unit_name": "литр"
+                
+            },
+            {
+                "name": "транзакция_10",
+                "datetime": "2025-02-02",
+                "nomenclature_name": "подсолнечное масло",
+                "storage_name": "Второй склад",
+                "count": -1500,
+                "measure_unit_name": "миллилитр"
+                
             }
         ]
     }

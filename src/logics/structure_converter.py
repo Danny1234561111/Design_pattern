@@ -15,6 +15,9 @@ class StructureConverter(AbstractConverter):
     
     Получает на вход структуру и конвертирует её значения
     """
+    
+    
+   
     def convert(self, object_: Union[List, Tuple, Dict]) -> Union[List, Dict]:
         from src.logics.factory_converters import FactoryConverters
         
