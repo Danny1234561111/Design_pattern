@@ -30,12 +30,11 @@ class OsdTbs:
         items: List[TransactionModel] = list(
             start_service.data[key].values()
         )
-        print(items)
         transactions = [item
                         for item in items
                         if (item.storage == storage and
                             item.date <= end)]
-        print(transactions)
+
 
         
         data: Dict[str, TbsLine] = dict()
@@ -47,25 +46,3 @@ class OsdTbs:
             line.add(transaction, start, end)
         
         return list(data.values())
-    
-
-# data: Dict[str, TbsLine] = dict()
-#         for transaction in transactions:
-#             code = transaction.nomenclature.unique_code
-#             if code not in data:
-#                 data[code] = TbsLine(transaction)
-#             line = data[code]
-#             # Вызываем add() с правильными параметрами (start_dt, end_dt)
-#             line.add(transaction, start, end) 
-        
-#         tbs_lines: List[TbsLine] = list(data.values())
-
-#         # Получаем заголовки
-#         headers = TbsLine.get_display_headers()
-#         print(headers)
-        
-
-#         # Преобразуем каждую TbsLine в словарь для отображения
-#         display_data = [line.to_display_data() for line in tbs_lines]
-#         print(display_data)
-#         return headers, display_data
