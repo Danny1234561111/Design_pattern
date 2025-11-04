@@ -1,7 +1,7 @@
 from typing import Optional, Self
 from src.core.validator import Validator as vld
 from src.core.abstract_model import AbstractModel
-from src.dtos.ingredient_dto import IngredientDto
+from src.dtos.Ingredient_dto import IngredientDto
 from src.models.nomenclature_model import NomenclatureModel
 from src.models.measure_unit_model import MeasureUnitModel
 from src.singletons.repository import Repository

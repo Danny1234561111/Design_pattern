@@ -3,7 +3,7 @@ from src.core.abstract_model import AbstractModel
 from src.core.validator import Validator as vld
 from src.dtos.measure_unit_dto import MeasureUnitDto
 from src.singletons.repository import Repository
-
+from typing import Tuple
 
 """Модель единиц измерения для моделей номенклатуры"""
 class MeasureUnitModel(AbstractModel):
@@ -81,3 +81,10 @@ class MeasureUnitModel(AbstractModel):
             name=dto.name,
             base_unit=base_unit
         )
+    """Находим самую базовую еденицу измерения"""
+    def get_base_unit(self) -> Tuple[Self, float]:
+        if self.base_unit is None:
+            return self, 1
+        else:
+            bu, c = self.base_unit.get_base_unit()
+            return bu, c * self.coefficient

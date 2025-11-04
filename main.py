@@ -6,13 +6,16 @@ from src.core.http_responses import (TextResponse, JsonResponse, ErrorResponse,
                                      FormatResponse)
 from src.logics.factory_entities import FactoryEntities
 from src.logics.factory_converters import FactoryConverters
+from src.logics.osd_tbs import OsdTbs
+from src.logics.tbs_line import TbsLine
 from src.singletons.repository import Repository
 from src.singletons.start_service import StartService
 from src.singletons.settings_manager import SettingsManager
 from pathlib import Path 
 from fastapi import Query 
-from datetime import datetime
+from datetime import date
 from typing import List,Dict
+
 
 settings_file = "data/settings.json"
 start_service = StartService()
@@ -94,62 +97,47 @@ def get_recipe(unique_code: str):
 
     return JsonResponse(result)
 
-
-@app.get("/api/osv", response_class=HTMLResponse)
-def get_osv(start_date: str, end_date: str, storage: str):
-    """
-    Получение оборотно-сальдовой ведомости (ОСВ) в формате HTML.
-    - `start_date`: дата начала (YYYY-MM-DD)
-    - `end_date`: дата окончания (YYYY-MM-DD)
-    - `storage`: склад
-    """
+@app.get("/api/storages")
+def get_storages():
+    """Получить список всех ID хранилищ."""
     try:
-        # Преобразуем строки в даты
-        start_date_2 = datetime.strptime(start_date, "%Y-%m-%d").date()
-        end_date_2 = datetime.strptime(end_date, "%Y-%m-%d").date()
+        storage_key = Repository.storages_key
+        storages_data = start_service.repository.data[storage_key]
+        storage_ids = list(storages_data.keys()) #Получаем ключи (ID) из словаря
+        return JsonResponse(storage_ids)
+    except KeyError:
+        raise HTTPException(status_code=500, detail=f"Storage key '{Repository.storages_key}' not found in repository data.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+@app.get("/api/tbs/{storage_code}")
+def get_tbs(storage_code: str, start: date, end: date):
+    """
+    Таблица оборотно-сальдовой ведомости (Trial Balance Sheet, TBS)
+    - `storage_code`: уникальный код склада
+    - `start`: начальная дата отчёта
+    - `end`: дата окончания отчёта
+    """
+    storage = start_service.repository.get(unique_code=storage_code)
+    if storage is None:
+        return ErrorResponse(f"Storage with code '{storage_code}' is null")
+    
+    if start >= end:
+        return ErrorResponse(f"End date must be later than start date")
+    
+    tbs_lines: List[TbsLine] = OsdTbs.calculate(storage, start, end, start_service)
 
-        # Получаем данные из репозитория (замените на ваш реальный код)
-        stock_data: List[StockData] = start_service.repository.get_stock_data(storage, start_date_2, end_date_2)
+    # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
+    headers = TbsLine.get_display_headers()
+    # Преобразуем каждую TbsLine в словарь для отображения
+    display_data_rows = [line.to_display_data() for line in tbs_lines]
 
-        # Формируем HTML-таблицу
-        html_table = """
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Начальный остаток</th>
-                    <th>Номенклатура</th>
-                    <th>Единица измерения</th>
-                    <th>Приход</th>
-                                        <th>Расход</th>
-                    <th>Конечный остаток</th>
-                </tr>
-            </thead>
-            <tbody>
-        """
+    html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    
 
-        for item in stock_data:
-            html_table += f"""
-                <tr>
-                    <td>{item.initial_balance}</td>
-                    <td>{item.nomenclature}</td>
-                    <td>{item.measure_unit}</td>
-                    <td>{item.income}</td>
-                    <td>{item.expense}</td>
-                    <td>{item.final_balance}</td>
-                </tr>
-            """
-
-        html_table += """
-            </tbody>
-        </table>
-        """
-
-        return HTMLResponse(content=html_table)
-
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Неверный формат даты. Используйте YYYY-MM-DD.")
-    except Exception as ex:
-        raise HTTPException(status_code=500, detail=str(ex))
+    return HTMLResponse(
+        final_html
+    )
 
 
 @app.post("/api/save") # Используем POST, так как это изменение состояния на сервере

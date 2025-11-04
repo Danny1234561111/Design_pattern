@@ -7,6 +7,7 @@ from src.logics.response_csv import ResponseCsv
 from src.logics.response_xml import ResponseXml
 from src.logics.response_json import ResponseJson
 from src.logics.response_markdown import ResponseMarkdown
+from src.logics.response_html_table import ResponseHtmlTable
 from src.singletons.settings_manager import SettingsManager
 
 
@@ -19,6 +20,7 @@ class FactoryEntities:
         "md": ResponseFormat.MARKDOWN,
         "json": ResponseFormat.JSON,
         "xml": ResponseFormat.XML,
+        "xml": ResponseFormat.HTMLTABLE,
     }
 
     # Сопоставление форматов и классов-ответов
@@ -26,7 +28,8 @@ class FactoryEntities:
         ResponseFormat.CSV: ResponseCsv,
         ResponseFormat.MARKDOWN: ResponseMarkdown,
         ResponseFormat.JSON: ResponseJson,
-        ResponseFormat.XML: ResponseXml
+        ResponseFormat.XML: ResponseXml,
+        ResponseFormat.HTMLTABLE: ResponseHtmlTable
     }
 
     """Метод получения экземпляра ответа"""

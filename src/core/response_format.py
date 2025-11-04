@@ -7,3 +7,4 @@ class ResponseFormat(Enum):
     MARKDOWN = auto()
     JSON = auto()
     XML = auto()
+    HTMLTABLE=auto()
