@@ -15,6 +15,7 @@ from pathlib import Path
 from fastapi import Query 
 from datetime import date
 from typing import List,Dict
+from src.dtos.filter_sorting_dto import filter_sorting_dto
 
 
 settings_file = "data/settings.json"
@@ -109,27 +110,27 @@ def get_storages():
         raise HTTPException(status_code=500, detail=f"Storage key '{Repository.storages_key}' not found in repository data.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-@app.get("/api/tbs/{storage_code}")
-def get_tbs(storage_code: str, start: date, end: date):
+@app.post("/api/tbs/{storage_id}")
+def get_tbs(start_date: date,end_date: date, storage_id: str, filters: dict = None):
     """
     Таблица оборотно-сальдовой ведомости (Trial Balance Sheet, TBS)
     - `storage_code`: уникальный код склада
     - `start`: начальная дата отчёта
     - `end`: дата окончания отчёта
     """
-    storage = start_service.repository.get(unique_code=storage_code)
+    if "filters" not in filters:
+        filters["filters"] = None
+    filters = filter_sorting_dto(filters["filters"])
+    storage = start_service.repository.get(unique_code=storage_id)
     if storage is None:
-        return ErrorResponse(f"Storage with code '{storage_code}' is null")
+        return ErrorResponse(f"Storage with code '{storage_id}' is null")
     
-    if start >= end:
+    if start_date >= end_date:
         return ErrorResponse(f"End date must be later than start date")
     
-    tbs_lines: List[TbsLine] = OsdTbs.calculate(storage, start, end, start_service)
+    headers,display_data_rows = OsdTbs.calculate(storage_id, start_date, end_date, start_service,filters)
 
     # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
-    headers = TbsLine.get_display_headers()
-    # Преобразуем каждую TbsLine в словарь для отображения
-    display_data_rows = [line.to_display_data() for line in tbs_lines]
 
     html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
     final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
@@ -201,4 +202,4 @@ if __name__ == "__main__":
     start_service.start(settings_file)
     uvicorn.run(app=app,
                 host="localhost",
-                port=8080)
+                port=8081)
