@@ -1,8 +1,7 @@
 import json
 from src.core.validator import Validator as vld
 from src.models.settings_model import SettingsModel
-
-
+from datetime import date
 """Менеджер настроек
 
 Предназначен для управления настройками и хранения параметров приложения.
@@ -29,11 +28,9 @@ class SettingsManager:
     @property
     def file_name(self) -> str:
         return self.__file_name
-
     @file_name.setter
     def file_name(self, value: str):
         self.__file_name = vld.is_file_exists(value)
-    
     """Настройки с хранящейся моделью компании"""
     @property
     def settings(self) -> SettingsModel:

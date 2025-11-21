@@ -191,10 +191,57 @@ def get_directories():
 @app.get("/api/transactions")
 def get_transactions():
     key = Repository.transactions_key
-    transactions = list(start_service.repository.data[key].values())
-    result = [transaction.to_dict() for transaction in transactions]
+    transactions = list(start_service.transactions.values())
 
-    return JsonResponse(result)
+    return JsonResponse(transactions)
+
+
+
+@app.get("/api/block_date")
+def get_block_date():
+    headers = start_service.repository.headers
+    display_data_rows = start_service.repository.turnovers_history
+
+    # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
+
+    html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    
+
+    return HTMLResponse(
+        final_html
+    )
+@app.post("/api/block_date_new")
+def post_block_date(new_date: date = Query(...)):
+    start_service.convert_ost(new_date)
+    headers = start_service.repository.headers
+    display_data_rows = start_service.repository.turnovers_history
+
+    # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
+
+    html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    
+
+    return HTMLResponse(
+        final_html
+    )
+
+@app.get("/api/ost/{new_date}")
+def search_ost_date(new_date: date):
+    headers,display_data_rows = OsdTbs.calculate_new_ost(new_date,start_service)
+
+    # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
+
+    html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    
+
+    return HTMLResponse(
+        final_html
+    )
+
+
 
 
 if __name__ == "__main__":
@@ -202,4 +249,4 @@ if __name__ == "__main__":
     start_service.start(settings_file)
     uvicorn.run(app=app,
                 host="localhost",
-                port=8081)
+                port=8082)

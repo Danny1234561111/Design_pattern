@@ -2,6 +2,8 @@ from src.core.validator import Validator as vld
 from src.core.abstract_model import AbstractModel
 from src.core.response_format import ResponseFormat
 from src.models.company_model import CompanyModel
+from datetime import date
+from typing import Optional,Dict
 
 
 """Модель настроек

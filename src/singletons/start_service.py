@@ -1,5 +1,6 @@
 import json
 from typing import Optional, Dict
+from datetime import date
 from src.core.validator import Validator as vld
 from src.core.exceptions import OperationException
 from src.dtos.measure_unit_dto import MeasureUnitDto
@@ -11,10 +12,12 @@ from src.models.measure_unit_model import MeasureUnitModel
 from src.models.nomenclature_model import NomenclatureModel
 from src.models.nomenclature_group_model import NomenclatureGroupModel
 from src.models.transaction_model import TransactionModel
+from src.models.stock_balance_model import StockBalanceModel
 from src.dtos.transaction_dto import TransactionDto
 from src.dtos.storage_dto import StorageDto
 from src.models.storage_model import StorageModel
 from src.singletons.repository import Repository
+import datetime
 
 
 """Класс, наполняющий приложение эталлоными объектами разных типов"""
@@ -28,8 +31,8 @@ class StartService:
     # Ссылка на объект Repository
     __repository: Optional[Repository] = Repository()
 
-    def __init__(self):
-        self.__repository.initalize()
+    # def __init__(self):
+    #     self.__repository.initalize()
 
     def __new__(cls):
         if cls.__instance is None:
@@ -37,6 +40,7 @@ class StartService:
         return cls.__instance
 
     """Поле пути до файла с загружаемыми объектами"""
+
     @property
     def file_name(self) -> str:
         return self.__file_name
@@ -49,6 +53,13 @@ class StartService:
     @property
     def data(self) -> dict:
         return self.__repository.data
+    @property
+    def block_date(self) -> date:
+        return self.__repository.block_date
+    
+    @block_date.setter
+    def block_date(self,value:date) -> date:
+        self.__repository.block_date=value
     
     """Объект репозитория"""
     @property
@@ -75,9 +86,13 @@ class StartService:
     @property
     def transactions(self) -> Dict[str, TransactionModel]:
         return self.data[Repository.transactions_key]
+    @property
+    def ost(self) -> date:
+        return self.objects[Repository.ost_key]
 
     """Метод загрузки эталонных моделей и рецептов из файла настроек"""
     def load(self) -> bool:
+        self.__repository.initalize()
         if not self.file_name:
             raise OperationException(
                 f"Data can't be loaded, file_name field is empty"
@@ -85,7 +100,10 @@ class StartService:
         with open(self.file_name, mode='r', encoding="utf-8") as file:
             objects = json.load(file)
             data = objects["models"]
-            return self.convert(data)
+            block=None
+            if(objects["block_date"]):
+                block=datetime.datetime.strptime(objects["block_date"],"%Y-%m-%d")
+            return self.convert(data,block)
     
     """Универсальный метод чтения и записи моделей из файла с помощью DTO
     
@@ -172,6 +190,16 @@ class StartService:
             dto_type=TransactionDto, 
             model_type=TransactionModel  
         )
+    def convert_ost(self, block_date:date) -> bool:
+        from src.logics.osd_tbs import OsdTbs
+        headers,display_data_rows,work_transactions,display_data_dict = OsdTbs.calculate_ost(block_date,self)
+        self.repository.headers = headers
+        self.repository.turnovers_history = display_data_rows
+        self.repository.next_transactions = work_transactions
+        self.repository.display_data_dict= display_data_dict
+
+
+        
     
     """Метод конвертации объекта в модели складов"""
     def __convert_storages(self, data: dict) -> bool:
@@ -183,15 +211,21 @@ class StartService:
             model_type=StorageModel 
         )
     """Метод конвертации объекта в модели"""
-    def convert(self, data: dict) -> bool:
+    def convert(self, data: dict,block_date) -> bool:
+        
         vld.is_dict(data, "data")
+        
         self.__convert_nomenclature_groups(data)
         self.__convert_measure_units(data)
         self.__convert_nomenlatures(data)
         self.__convert_recipes(data)
         
         self.__convert_storages(data) 
-        self.__convert_transactions(data)  
+        self.__convert_transactions(data)
+        if block_date:
+            self.__repository.block_date = block_date
+            self.convert_ost(block_date)
+        # self.__create_block(data)
     
     """Метод вызова методов генерации эталонных данных"""
     def start(self, file_name: str):

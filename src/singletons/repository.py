@@ -4,6 +4,7 @@ from src.core.exceptions import ParamException
 from datetime import date
 from src.utils import get_properties  # Убедитесь, что этот импорт правильный
 from src.models.stock_item_model import StockItem  # Импорт класса StockItem
+from src.models.stock_balance_model import StockBalanceModel
 
 """Репозиторий данных"""
 class Repository:
@@ -12,6 +13,7 @@ class Repository:
 
     # Словарь наименований моделей
     __data = dict()
+    __block_date: Optional[date] = None
 
     # Ключи для данных в репозитории
     measure_unit_key: str = "measure_units"  # Ключ для единиц измерения
@@ -22,6 +24,12 @@ class Repository:
     # Новые ключи для складов и транзакций
     storages_key: str = "storages"  # Ключ для складов
     transactions_key: str = "transactions"  # Ключ для транзакций
+    headers:List={}
+    turnovers_history: List= []
+    next_transactions: Dict = {}
+    display_data_dict:List = {}
+    # [date, Dict[str, StockBalanceModel]] 
+
 
     def __new__(cls):
         if cls.__instance is None:
@@ -32,6 +40,13 @@ class Repository:
     @property
     def data(self) -> dict:
         return self.__data
+    @property
+    def block_date(self) -> date:
+        return self.__block_date
+    
+    @block_date.setter
+    def block_date(self,value:date) -> date:
+        self.__block_date=value
     
     """Метод получения всех ключей в репозитории по шаблону `*_key`"""
     @staticmethod

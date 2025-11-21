@@ -50,6 +50,6 @@ class Prototype:
             # Получаем значение поля для текущего элемента
                 value = getattr(item, filter_dto.field_name, None)
                 # Выполняем сравнение
-                if operator_func(filter_dto.value,value.name):
+                if operator_func(value,filter_dto.value):
                     result.append(item)
         return result
