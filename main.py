@@ -133,7 +133,7 @@ def get_tbs(start_date: date,end_date: date, storage_id: str, filters: dict = No
     # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
 
     html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
-    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows,name = "оборотно-сальдовой ведомости") 
     
 
     return HTMLResponse(
@@ -205,7 +205,7 @@ def get_block_date():
     # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
 
     html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
-    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows,name = "Остатки на контрольную дату") 
     
 
     return HTMLResponse(
@@ -220,7 +220,7 @@ def post_block_date(new_date: date = Query(...)):
     # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
 
     html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
-    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows,name = f"остатков на {new_date}") 
     
 
     return HTMLResponse(
@@ -234,7 +234,7 @@ def search_ost_date(new_date: date):
     # Теперь мы получаем заголовки и данные для отображения здесь, в эндпоинте
 
     html_table_builder = factory_entities.create(ResponseFormat.HTMLTABLE)
-    final_html = html_table_builder.build(headers=headers, data=display_data_rows) 
+    final_html = html_table_builder.build(headers=headers, data=display_data_rows,name = f"остатков на {new_date}") 
     
 
     return HTMLResponse(

@@ -14,7 +14,7 @@ class ResponseHtmlTable(AbstractResponse):
         super().__init__()
     
     # Метод build теперь принимает `headers` и `data`
-    def build(self, headers: List[str], data: List[Dict[str, Any]]) -> str:
+    def build(self, headers: List[str], data: List[Dict[str, Any]],name:str) -> str:
         # Проверка данных
         if not headers or not data or not isinstance(data, list) or not all(isinstance(item, dict) for item in data):
             return "<p>Нет данных для отображения или некорректный формат.</p>"
@@ -22,7 +22,7 @@ class ResponseHtmlTable(AbstractResponse):
         html_output = []
 
         # Заголовок таблицы (может быть общим или динамическим)
-        html_output.append("<h1>Отчет оборотно-сальдовой ведомости</h1>") # Общий заголовок
+        html_output.append(f"<h1>Отчет {name}</h1>") # Общий заголовок
 
         html_output.append("<table border='1' cellpadding='5' cellspacing='0' style='width:100%; border-collapse: collapse;'>")
         

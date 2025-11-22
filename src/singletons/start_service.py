@@ -12,7 +12,6 @@ from src.models.measure_unit_model import MeasureUnitModel
 from src.models.nomenclature_model import NomenclatureModel
 from src.models.nomenclature_group_model import NomenclatureGroupModel
 from src.models.transaction_model import TransactionModel
-from src.models.stock_balance_model import StockBalanceModel
 from src.dtos.transaction_dto import TransactionDto
 from src.dtos.storage_dto import StorageDto
 from src.models.storage_model import StorageModel

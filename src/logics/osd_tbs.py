@@ -14,7 +14,6 @@ from src.logics.prototype_report import PrototypeReport
 from src.dtos.filter_dto import FiltredDto
 from src.dtos.filter_sorting_dto import filter_sorting_dto
 from src.core.filter_operators import filter_operators
-from src.models.stock_balance_model import StockBalanceModel
 class OsdTbs:
 
     @staticmethod
@@ -86,22 +85,22 @@ class OsdTbs:
         transactions = list(start_service.transactions.values())
         prototype = PrototypeReport(transactions)
 
-        filt = FiltredDto()
-        filt1 = FiltredDto()
-        filt.load({
+        filt_block = FiltredDto()
+        filt_next_info = FiltredDto()
+        filt_block.load({
             "field_name": "date",
             "value": block_date,
             "operator": filter_operators.less(),
         })
-        filt1.load({
+        filt_next_info.load({
             "field_name": "date",
             "value": block_date,
             "operator": filter_operators.not_less(),
         })
         
         
-        filtered_transactions = prototype.filter(prototype, filt)
-        work_transactions = prototype.filter(prototype, filt1)
+        filtered_transactions = prototype.filter(prototype, filt_block)
+        work_transactions = prototype.filter(prototype, filt_next_info)
 
         data: Dict[str, TbsLineOst] = {}
 
@@ -127,8 +126,8 @@ class OsdTbs:
 
         tbs_lines: List[TbsLineOst] = list(data.values())
         headers = TbsLineOst.get_display_headers()
-        display_data_rows = [line.to_display_data() for line in tbs_lines]
-        display_data_dict = [line.to_display_dict() for line in tbs_lines]
+        display_data_rows = [line.to_display_data() for line in tbs_lines if line.quantity!=0]
+        display_data_dict = [line.to_display_dict() for line in tbs_lines if line.quantity!=0]
         return headers,display_data_rows,work_transactions.data,display_data_dict
     
     @staticmethod
@@ -169,23 +168,10 @@ class OsdTbs:
             line = data[code]
             line.add(transaction)
 
-        all_nomenclatures = StartService().data[Repository.nomenclatures_key].keys()
-        for key in all_nomenclatures:
-            if key not in data:
-                nomenclature = StartService().repository.get(unique_code=key)
-                if nomenclature is None:
-                    continue
-                data[key] = TbsLineOst(Ost(
-                    nomenclature=nomenclature,
-                    quantity=0,  # Обнуляем счетчик
-                    measure_unit=nomenclature.measure_unit
-                ))
-        
-
         tbs_lines: List[TbsLineOst] = list(data.values())
         
         headers = TbsLineOst.get_display_headers()
-        display_data_rows = [line.to_display_data() for line in tbs_lines]
+        display_data_rows = [line.to_display_data() for line in tbs_lines if line.quantity!=0]
        
 
         

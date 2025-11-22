@@ -90,6 +90,8 @@ class TbsLineOst:
         Возвращает данные строки ОСВ в виде словаря с русскими названиями
         и в порядке, удобном для отображения.
         """
+        if (round(self.quantity, 3)==0):
+            return {}
         return {
             "Имя номенклатуры": self.nomenclature.name,
             "Единица измерения": self.measure_unit.name,
