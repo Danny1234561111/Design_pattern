@@ -100,7 +100,7 @@ class StartService:
             objects = json.load(file)
             data = objects["models"]
             block=None
-            if(objects["block_date"]):
+            if "block_date" in objects:
                 block=datetime.datetime.strptime(objects["block_date"],"%Y-%m-%d")
             return self.convert(data,block)
     

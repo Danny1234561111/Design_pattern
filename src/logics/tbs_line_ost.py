@@ -5,12 +5,14 @@ from src.core.exceptions import OperationException
 from src.models.transaction_model import TransactionModel
 from src.models.ost_model import Ost
 from src.models.measure_unit_model import MeasureUnitModel
+from src.models.storage_model import StorageModel
 from src.models.nomenclature_model import NomenclatureModel
 
 
 class TbsLineOst:
     _nomenclature: NomenclatureModel
     _measure_unit: MeasureUnitModel
+    _storage: StorageModel
     _ost: List[float]
     
     def __init__(self, transaction: TransactionModel):
@@ -18,6 +20,7 @@ class TbsLineOst:
         # !!! ИСПРАВЛЕНИЕ ОШИБКИ TypeError: cannot unpack non-iterable NoneType object !!!
         base_unit, _ = self.nomenclature.measure_unit.get_base_unit()
         self.measure_unit = base_unit
+        self.storage = transaction.storage
         self._ost = []
 
     @property
@@ -82,6 +85,7 @@ class TbsLineOst:
         return {
             "Имя номенклатуры": self.nomenclature,
             "Единица измерения": self.measure_unit,
+            "Склад": self.storage,
             "Остаток": round(self.quantity, 3),
         }
 
@@ -95,6 +99,7 @@ class TbsLineOst:
         return {
             "Имя номенклатуры": self.nomenclature.name,
             "Единица измерения": self.measure_unit.name,
+            "Склад": self.storage,
             "Остаток": round(self.quantity, 3),
         }
     @staticmethod
@@ -105,5 +110,6 @@ class TbsLineOst:
         return [
             "Имя номенклатуры",
             "Единица измерения",
+            "Склад",
             "Остаток"
         ]

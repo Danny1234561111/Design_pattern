@@ -106,23 +106,11 @@ class OsdTbs:
 
         for transaction in filtered_transactions.data:
             code = transaction.nomenclature.unique_code
-            if code not in data:
-                data[code] = TbsLineOst(transaction)
-            line = data[code]
+            code_stor = transaction.storage.name
+            if (code,code_stor) not in data:
+                data[code,code_stor] = TbsLineOst(transaction)
+            line = data[code,code_stor]
             line.add(transaction)
-        
-
-        all_nomenclatures = StartService().data[Repository.nomenclatures_key].keys()
-        for key in all_nomenclatures:
-            if key not in data:
-                nomenclature = StartService().repository.get(unique_code=key)
-                if nomenclature is None:
-                    continue
-                data[key] = TbsLineOst(Ost(
-                    nomenclature=nomenclature,
-                    quantity=0,  # Обнуляем счетчик
-                    measure_unit=nomenclature.measure_unit
-                ))
 
         tbs_lines: List[TbsLineOst] = list(data.values())
         headers = TbsLineOst.get_display_headers()
@@ -151,21 +139,23 @@ class OsdTbs:
         filtered_transactions = prototype.filter(prototype, filt)
 
         data: Dict[str, TbsLineOst] = {}
-        old_transactions = start_service.repository.display_data_dict
+        old_ost = start_service.repository.display_data_dict
         range = list(start_service.measure_units.values())
         for transaction in filtered_transactions.data:
             code = transaction.nomenclature.unique_code
-            if code not in data:
-                data[code] = TbsLineOst(transaction)
-            line = data[code]
+            code_stor = transaction.storage.name
+            if (code,code_stor) not in data:
+                data[code,code_stor] = TbsLineOst(transaction)
+            line = data[code,code_stor]
             line.add(transaction)
         
-        for ost in old_transactions:
-            transaction = TransactionModel(None,None,ost["Имя номенклатуры"],None,ost["Остаток"],ost["Единица измерения"],"transaction")
+        for ost in old_ost:
+            transaction = TransactionModel(None,None,ost["Имя номенклатуры"],ost["Склад"],ost["Остаток"],ost["Единица измерения"],"transaction")
             code = transaction.nomenclature.unique_code
-            if code not in data:
-                data[code] = TbsLineOst(transaction)
-            line = data[code]
+            code_stor = transaction.storage.name
+            if (code,code_stor) not in data:
+                data[code,code_stor] = TbsLineOst(transaction)
+            line = data[code,code_stor]
             line.add(transaction)
 
         tbs_lines: List[TbsLineOst] = list(data.values())

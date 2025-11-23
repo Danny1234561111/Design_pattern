@@ -211,6 +211,15 @@
                 "count": -1500,
                 "measure_unit_name": "миллилитр"
                 
+            },
+            {
+                "name": "транзакция_11",
+                "datetime": "2025-02-02",
+                "nomenclature_name": "подсолнечное масло",
+                "storage_name": "Главный склад",
+                "count": 1500,
+                "measure_unit_name": "миллилитр"
+                
             }
         ]
     }
