@@ -19,26 +19,15 @@ from src.singletons.repository import Repository
 import datetime
 
 
-"""Класс, наполняющий приложение эталлоными объектами разных типов"""
 class StartService:
-    # Ссылка на экземпляр StartService
     __instance = None
-
-    # Путь до файла с загружаемыми объектами
     __file_name: str = ""
-
-    # Ссылка на объект Repository
     __repository: Optional[Repository] = Repository()
-
-    # def __init__(self):
-    #     self.__repository.initalize()
 
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
         return cls.__instance
-
-    """Поле пути до файла с загружаемыми объектами"""
 
     @property
     def file_name(self) -> str:
@@ -48,7 +37,6 @@ class StartService:
     def file_name(self, value: str):
         self.__file_name = vld.is_file_exists(value)
 
-    """Словарь данных репозитория"""
     @property
     def data(self) -> dict:
         return self.__repository.data
@@ -60,22 +48,18 @@ class StartService:
     def block_date(self,value:date) -> date:
         self.__repository.block_date=value
     
-    """Объект репозитория"""
     @property
     def repository(self) -> Repository:
         return self.__repository
 
-    """Группы номенклатур в репозитории"""
     @property
     def nomenclature_groups(self) -> Dict[str, NomenclatureGroupModel]:
         return self.data[Repository.nomenclature_group_key]
     
-    """Единицы измерения в репозитории"""
     @property
     def measure_units(self) -> Dict[str, MeasureUnitModel]:
         return self.data[Repository.measure_unit_key]
     
-    """Номенклатуры в репозитории"""
     @property
     def nomenclatures(self) -> Dict[str, NomenclatureModel]:
         return self.data[Repository.nomenclatures_key]
@@ -89,31 +73,83 @@ class StartService:
     def ost(self) -> date:
         return self.objects[Repository.ost_key]
 
-    """Метод загрузки эталонных моделей и рецептов из файла настроек"""
     def load(self) -> bool:
         self.__repository.initalize()
         if not self.file_name:
             raise OperationException(
                 f"Data can't be loaded, file_name field is empty"
             )
-        with open(self.file_name, mode='r', encoding="utf-8") as file:
-            objects = json.load(file)
-            data = objects["models"]
-            block=None
-            if "block_date" in objects:
-                block=datetime.datetime.strptime(objects["block_date"],"%Y-%m-%d")
-            return self.convert(data,block)
+        try:
+            with open(self.file_name, mode='r', encoding="utf-8") as file:
+                objects = json.load(file)
+                data = objects["models"]
+                block=None
+                if "block_date" in objects:
+                    block=datetime.datetime.strptime(objects["block_date"],"%Y-%m-%d").date()
+                return self.convert(data,block)
+        except json.JSONDecodeError as e:
+            raise OperationException(f"Invalid JSON file: {e}")
     
-    """Универсальный метод чтения и записи моделей из файла с помощью DTO
+    def __get_ost_file_name(self) -> str:
+        """Генерирует имя файла для остатков на основе основного файла"""
+        base_name = self.file_name.replace('.json', '')
+        return f"{base_name}_ost.json"
     
-    Args:
-        data (dict): общий словарь со всеми моделями
-        data_key (str): ключ словаря data с целевыми моделями
-        repo_key (str): ключ репозитория, который ссылается
-            на словарь с моделями
-        dto_type (type): класс, унаследованный от AbstractDto
-        model_type (type): класс, унаследованный от AbstractModel
-    """
+    def save_repository_data(self):
+        """Сохраняет данные репозитория в отдельный файл для остатков"""
+        ost_file_name = self.__get_ost_file_name()
+        
+        repository_data = self.__get_repository_data()
+        
+        # Сериализуем данные безопасно
+        def default_serializer(obj):
+            if isinstance(obj, date):
+                return obj.isoformat()
+            return str(obj)
+        
+        try:
+            with open(ost_file_name, mode='w', encoding="utf-8") as file:
+                json.dump(repository_data, file, ensure_ascii=False, indent=2, default=default_serializer)
+        except Exception as e:
+            raise OperationException(f"Failed to save repository data: {e}")
+
+    def load_repository_data(self) -> bool:
+        """Загружает данные репозитория из файла остатков"""
+        ost_file_name = self.__get_ost_file_name()
+        
+        try:
+            with open(ost_file_name, mode='r', encoding="utf-8") as file:
+                repo_data = json.load(file)
+                self.__load_repository_data(repo_data)
+                return True
+        except FileNotFoundError:
+            return False
+        except json.JSONDecodeError as e:
+            raise OperationException(f"Invalid OST JSON file: {e}")
+
+    def __get_repository_data(self) -> dict:
+        return {
+            "headers": self.repository.headers,
+            "turnovers_history": self.repository.turnovers_history,
+            "next_transactions": [str(txn) for txn in self.repository.next_transactions],
+            "display_data_dict": self.repository.display_data_dict,
+            "block_date": self.repository.block_date.isoformat() if self.repository.block_date else None
+        }
+
+    def __load_repository_data(self, repo_data: dict):
+        if "headers" in repo_data:
+            self.repository.headers = repo_data["headers"]
+        if "turnovers_history" in repo_data:
+            self.repository.turnovers_history = repo_data["turnovers_history"]
+        if "next_transactions" in repo_data:
+            self.repository.next_transactions = repo_data["next_transactions"]
+        if "display_data_dict" in repo_data:
+            self.repository.display_data_dict = repo_data["display_data_dict"]
+        if "block_date" in repo_data and repo_data["block_date"]:
+            self.repository.block_date = datetime.datetime.strptime(
+                repo_data["block_date"], "%Y-%m-%d"
+            ).date()
+
     def __convert_models(
         self,
         data: dict,
@@ -131,7 +167,6 @@ class StartService:
             return False
         
         for item in items:
-            # Если объект с таким же именем уже существует, то пропускаем
             if self.__repository.get_by_name(item.get("name", "")):
                 continue
             
@@ -141,7 +176,6 @@ class StartService:
 
         return True
     
-    """Метод конвертации объекта в модели групп номенклатур"""
     def __convert_nomenclature_groups(self, data: dict) -> bool:
         return self.__convert_models(
             data=data,
@@ -151,7 +185,6 @@ class StartService:
             model_type=NomenclatureGroupModel
         )
     
-    """Метод конвертации объекта в модели единиц измерения"""
     def __convert_measure_units(self, data: dict) -> bool:
         return self.__convert_models(
             data=data,
@@ -161,7 +194,6 @@ class StartService:
             model_type=MeasureUnitModel
         )
     
-    """Метод конвертации объекта в модели номенклатур"""
     def __convert_nomenlatures(self, data: dict) -> bool:
         return self.__convert_models(
             data=data,
@@ -171,7 +203,6 @@ class StartService:
             model_type=NomenclatureModel
         )
 
-    """Метод конвертации объекта в модели рецептов"""
     def __convert_recipes(self, data: dict) -> bool:
         return self.__convert_models(
             data=data,
@@ -180,7 +211,6 @@ class StartService:
             dto_type=RecipeDto,
             model_type=RecipeModel
         )
-        """Метод конвертации объекта в модели транзакций"""
     def __convert_transactions(self, data: dict) -> bool:
         return self.__convert_models(
             data=data,
@@ -189,18 +219,36 @@ class StartService:
             dto_type=TransactionDto, 
             model_type=TransactionModel  
         )
-    def convert_ost(self, block_date:date) -> bool:
+    def convert_ost(self, block_date:date = None) -> bool:
+        if block_date is None:
+            # Пытаемся загрузить из файла остатков
+            if self.load_repository_data():
+                return True
+            else:
+                raise OperationException(
+                    "Block date is not specified and no saved OST data found"
+                )
+        
+        # Проверяем, совпадает ли block_date с сохраненным
+        if (self.repository.block_date and 
+            self.repository.block_date == block_date and
+            self.repository.headers and 
+            self.repository.turnovers_history):
+            return True
+        
+        # Вычисляем новые данные
         from src.logics.osd_tbs import OsdTbs
         headers,display_data_rows,work_transactions,display_data_dict = OsdTbs.calculate_ost(block_date,self)
         self.repository.headers = headers
         self.repository.turnovers_history = display_data_rows
         self.repository.next_transactions = work_transactions
         self.repository.display_data_dict= display_data_dict
-
+        self.repository.block_date = block_date
+        self.save_repository_data()
+        return True
 
         
     
-    """Метод конвертации объекта в модели складов"""
     def __convert_storages(self, data: dict) -> bool:
         return self.__convert_models(
             data=data,
@@ -209,7 +257,6 @@ class StartService:
             dto_type=StorageDto,
             model_type=StorageModel 
         )
-    """Метод конвертации объекта в модели"""
     def convert(self, data: dict,block_date) -> bool:
         
         vld.is_dict(data, "data")
@@ -224,9 +271,7 @@ class StartService:
         if block_date:
             self.__repository.block_date = block_date
             self.convert_ost(block_date)
-        # self.__create_block(data)
     
-    """Метод вызова методов генерации эталонных данных"""
     def start(self, file_name: str):
         self.file_name = file_name
         self.load()
