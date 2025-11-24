@@ -9,40 +9,40 @@
     {
       "Имя номенклатуры": "яйца",
       "Единица измерения": "штука",
-      "Склад": "<src.models.storage_model.StorageModel object at 0x0000023E70B1FB60>",
+      "Склад": "Главный склад",
       "Остаток": 8
     },
     {
       "Имя номенклатуры": "молоко",
       "Единица измерения": "литр",
-      "Склад": "<src.models.storage_model.StorageModel object at 0x0000023E70B1FB60>",
+      "Склад": "Главный склад",
       "Остаток": 3
     }
   ],
   "next_transactions": [
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70B1FCB0>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70BCF890>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70B976F0>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70C139B0>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70BEA360>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70BE98C0>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70BC6E50>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70BC6F50>",
-    "<src.models.transaction_model.TransactionModel object at 0x0000023E70BED8B0>"
+    "транзакция_1",
+    "транзакция_3",
+    "транзакция_5",
+    "транзакция_6",
+    "транзакция_7",
+    "транзакция_8",
+    "транзакция_9",
+    "транзакция_10",
+    "транзакция_11"
   ],
   "display_data_dict": [
     {
-      "Имя номенклатуры": "<src.models.nomenclature_model.NomenclatureModel object at 0x0000023E70B1F620>",
-      "Единица измерения": "<src.models.measure_unit_model.MeasureUnitModel object at 0x0000023E70BCEFD0>",
-      "Склад": "<src.models.storage_model.StorageModel object at 0x0000023E70B1FB60>",
+      "Имя номенклатуры": "яйца",
+      "Единица измерения": "штука",
+      "Склад": "Главный склад",
       "Остаток": 8
     },
     {
-      "Имя номенклатуры": "<src.models.nomenclature_model.NomenclatureModel object at 0x0000023E70BCEC10>",
-      "Единица измерения": "<src.models.measure_unit_model.MeasureUnitModel object at 0x0000023E70B1F4D0>",
-      "Склад": "<src.models.storage_model.StorageModel object at 0x0000023E70B1FB60>",
+      "Имя номенклатуры": "молоко",
+      "Единица измерения": "литр",
+      "Склад": "Главный склад",
       "Остаток": 3
     }
   ],
-  "block_date": "2024-11-10"
+  "block_date": "2024-01-01"
 }

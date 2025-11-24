@@ -77,17 +77,6 @@ class TbsLineOst:
         self._ost.append(quantity)
 
     # --- НОВЫЕ МЕТОДЫ ДЛЯ ОТОБРАЖЕНИЯ ДАННЫХ ВНУТРИ КЛАССА TBSLINE ---
-    def to_display_dict(self) -> Dict[str, Any]:
-        """
-        Возвращает данные строки ОСВ в виде словаря с русскими названиями
-        и в порядке, удобном для отображения.
-        """
-        return {
-            "Имя номенклатуры": self.nomenclature,
-            "Единица измерения": self.measure_unit,
-            "Склад": self.storage,
-            "Остаток": round(self.quantity, 3),
-        }
 
     def to_display_data(self) -> Dict[str, Any]:
         """
@@ -99,7 +88,7 @@ class TbsLineOst:
         return {
             "Имя номенклатуры": self.nomenclature.name,
             "Единица измерения": self.measure_unit.name,
-            "Склад": self.storage,
+            "Склад": self.storage.name,
             "Остаток": round(self.quantity, 3),
         }
     @staticmethod

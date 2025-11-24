@@ -101,6 +101,8 @@ class OsdTbs:
         
         filtered_transactions = prototype.filter(prototype, filt_block)
         work_transactions = prototype.filter(prototype, filt_next_info)
+        for i,tr in enumerate(work_transactions.data):
+            work_transactions.data[i]= tr.name
 
         data: Dict[str, TbsLineOst] = {}
 
@@ -115,7 +117,7 @@ class OsdTbs:
         tbs_lines: List[TbsLineOst] = list(data.values())
         headers = TbsLineOst.get_display_headers()
         display_data_rows = [line.to_display_data() for line in tbs_lines if line.quantity!=0]
-        display_data_dict = [line.to_display_dict() for line in tbs_lines if line.quantity!=0]
+        display_data_dict = [line.to_display_data() for line in tbs_lines if line.quantity!=0]
         return headers,display_data_rows,work_transactions.data,display_data_dict
     
     @staticmethod
@@ -126,7 +128,11 @@ class OsdTbs:
         # vld.validate(block_date, date, "block date")
         block_date: date = start_service.block_date
         end_date = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
+        
+        
         transactions = list(start_service.repository.next_transactions)
+        for i,next in enumerate(transactions):
+             transactions[i]= start_service.repository.get(name=next)
         prototype = PrototypeReport(transactions)
 
         filt = FiltredDto()
@@ -142,6 +148,7 @@ class OsdTbs:
         old_ost = start_service.repository.display_data_dict
         range = list(start_service.measure_units.values())
         for transaction in filtered_transactions.data:
+            
             code = transaction.nomenclature.unique_code
             code_stor = transaction.storage.name
             if (code,code_stor) not in data:
@@ -150,9 +157,11 @@ class OsdTbs:
             line.add(transaction)
         
         for ost in old_ost:
-            transaction = TransactionModel(None,None,ost["Имя номенклатуры"],ost["Склад"],ost["Остаток"],ost["Единица измерения"],"transaction")
-            code = transaction.nomenclature.unique_code
-            code_stor = transaction.storage.name
+            stor = start_service.repository.get(name=ost["Склад"])
+            nomenclature = start_service.repository.get(name=ost["Имя номенклатуры"])
+            transaction = TransactionModel(None,None,nomenclature,stor,ost["Остаток"],nomenclature.measure_unit,"transaction")
+            code = nomenclature.unique_code
+            code_stor = stor.name
             if (code,code_stor) not in data:
                 data[code,code_stor] = TbsLineOst(transaction)
             line = data[code,code_stor]
