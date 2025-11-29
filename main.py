@@ -16,13 +16,15 @@ from fastapi import Query
 from datetime import date
 from typing import List,Dict
 from src.dtos.filter_sorting_dto import filter_sorting_dto
-
+from src.singletons.reference_service import ReferenceService
 
 settings_file = "data/settings.json"
 start_service = StartService()
 settings_manager = SettingsManager()
 factory_entities = FactoryEntities()
 factory_converters = FactoryConverters()
+reference_service = ReferenceService()
+
 
 app = FastAPI()
 
@@ -241,7 +243,68 @@ def search_ost_date(new_date: date):
         final_html
     )
 
+@app.get("/api/{reference_type}")
+def get_reference_item(reference_type: str, name: str = Query(...)):
+    """Получение элемента справочника по имени"""
+    try:
+        item = reference_service.get(reference_type, name)
+        if item:
+            return JsonResponse(item)
+        else:
+            return ErrorResponse(f"Элемент '{name}' не найден в справочнике '{reference_type}'", status_code=404)
+    except Exception as e:
+        return ErrorResponse(str(e))
 
+@app.get("/api/{reference_type}/all")
+def get_all_reference_items(reference_type: str):
+    """Получение всех элементов справочника"""
+    try:
+        items = reference_service.get_all(reference_type)
+        return JsonResponse(items)
+    except Exception as e:
+        return ErrorResponse(str(e))
+
+@app.put("/api/{reference_type}")
+def add_reference_item(reference_type: str, data: dict):
+    """Добавление нового элемента справочника"""
+    try:
+        result = reference_service.add(reference_type, data)
+        return JsonResponse(result)
+    except Exception as e:
+        return ErrorResponse(str(e))
+
+@app.patch("/api/{reference_type}")
+def update_reference_item(reference_type: str, name: str = Query(...), data: dict = None):
+    """Обновление элемента справочника"""
+    try:
+        if data is None:
+            return ErrorResponse("Не переданы данные для обновления")
+        
+        result = reference_service.update(reference_type, name, data)
+        return JsonResponse(result)
+    except Exception as e:
+        return ErrorResponse(str(e))
+
+@app.delete("/api/{reference_type}")
+def delete_reference_item(reference_type: str, name: str = Query(...)):
+    """Удаление элемента справочника"""
+    try:
+        success = reference_service.delete(reference_type, name)
+        return JsonResponse({"success": success, "message": f"Элемент '{name}' удален"})
+    except Exception as e:
+        return ErrorResponse(str(e))
+
+@app.get("/api/{reference_type}/search")
+def search_reference_items(reference_type: str, criteria: dict = None):
+    """Поиск элементов справочника по критериям"""
+    try:
+        if criteria is None:
+            return ErrorResponse("Не переданы критерии поиска")
+        
+        items = reference_service.find_by_criteria(reference_type, criteria)
+        return JsonResponse(items)
+    except Exception as e:
+        return ErrorResponse(str(e))
 
 
 if __name__ == "__main__":
