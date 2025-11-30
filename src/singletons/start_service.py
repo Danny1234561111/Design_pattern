@@ -541,6 +541,34 @@ class StartService(AbstractSubscriber):
             })
             raise OperationException(f"Не удалось сохранить репозиторий: {e}")
 
+    def __save_settings_file(self, file_path: str):
+        """Сохраняет настройки в файл appsettings.json в исходном формате"""
+        try:
+            # Загружаем текущие настройки
+            with open(self.file_name, mode='r', encoding='utf-8') as file:
+                current_settings = json.load(file)
+            
+            # Обновляем только block_date
+            current_settings["block_date"] = self.block_date.strftime("%Y-%m-%d")
+            
+            # Сохраняем обратно
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(current_settings, file, ensure_ascii=False, indent=2)
+                
+            observe_service.create_event(event_type.reference_operation_completed(), {
+                "operation": "save_settings",
+                "status": "success",
+                "file_path": file_path
+            })
+            
+        except Exception as e:
+            observe_service.create_event(event_type.reference_operation_completed(), {
+                "operation": "save_settings",
+                "status": "error",
+                "error": f"Ошибка сохранения настроек: {e}"
+            })
+            raise OperationException(f"Не удалось сохранить настройки: {e}")
+
     """
     Обработка событий
     """
@@ -568,6 +596,4 @@ class StartService(AbstractSubscriber):
             vld.validate(new_block_date, date, "new_block_date")
             self.block_date = new_block_date
             self.convert_ost()
-            self.save_data()
-            # Сохраняем репозиторий в appsettings.json
-            self.save_repository("appsettings.json")
+            self.__save_settings_file("appsettings.json")
