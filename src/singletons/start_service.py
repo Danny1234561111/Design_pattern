@@ -12,7 +12,6 @@ from src.core.abstract_dto import object_to_dto
 from src.singletons.repository import Repository
 from src.singletons.settings_manager import SettingsManager
 from src.logics.factory_converters import FactoryConverters
-from src.logics.print_service import print_service
 
 # Импорты для конвертации моделей
 from src.dtos.measure_unit_dto import MeasureUnitDto
@@ -34,7 +33,6 @@ class StartService(AbstractSubscriber):
     __file_name: str = ""
     __repository: Optional[Repository] = Repository()
     __settings_manager: SettingsManager = SettingsManager()
-    __print_service: print_service = print_service()
 
     # Соответствие типов справочников DTO и моделям
     __reference_mapping = {
