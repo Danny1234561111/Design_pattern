@@ -1,12 +1,16 @@
 import json
 from src.core.validator import Validator as vld
 from src.models.settings_model import SettingsModel
-from datetime import date
+from datetime import date, datetime
+from src.core.abstract_subscriber import AbstractSubscriber
+from src.core.observe_service import observe_service
+from src.core.event_type import event_type
+
 """Менеджер настроек
 
 Предназначен для управления настройками и хранения параметров приложения.
 """
-class SettingsManager:
+class SettingsManager(AbstractSubscriber):
     # Ссылка на экземпляр SettingsManager
     __instance = None
 
@@ -18,6 +22,7 @@ class SettingsManager:
 
     def __init__(self):
         self.default()
+        observe_service.add(self)
 
     def __new__(cls):
         if cls.__instance is None:
@@ -28,9 +33,11 @@ class SettingsManager:
     @property
     def file_name(self) -> str:
         return self.__file_name
+    
     @file_name.setter
     def file_name(self, value: str):
         self.__file_name = vld.is_file_exists(value)
+    
     """Настройки с хранящейся моделью компании"""
     @property
     def settings(self) -> SettingsModel:
@@ -95,3 +102,15 @@ class SettingsManager:
         self.settings = SettingsModel()
         self.settings.company.name = "Default Name"
         self.settings.company.ownership = "owner"
+
+    """
+    Обработка событий
+    """
+    def handle(self, event: str, params: dict):
+        vld.validate(params, dict,"params")
+        super().handle(event, params)
+
+        if event == event_type.change_block_period():
+            new_block_date = params["new_block_date"]
+            vld.validate(new_block_date, datetime,"new_block_date")
+            self.__settings.block_date = new_block_date

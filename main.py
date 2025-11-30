@@ -14,9 +14,13 @@ from src.singletons.settings_manager import SettingsManager
 from pathlib import Path 
 from fastapi import Query 
 from datetime import date
+from datetime import datetime
 from typing import List,Dict
 from src.dtos.filter_sorting_dto import filter_sorting_dto
-from src.singletons.reference_service import ReferenceService
+
+from src.logics.reference_service import ReferenceService
+from src.core.observe_service import observe_service
+from src.core.event_type import event_type
 
 settings_file = "data/settings.json"
 start_service = StartService()
@@ -242,69 +246,96 @@ def search_ost_date(new_date: date):
     return HTMLResponse(
         final_html
     )
-
-@app.get("/api/{reference_type}")
-def get_reference_item(reference_type: str, name: str = Query(...)):
+@app.get("/api/referense/{name}")
+async def get_reference_item(name: str):
     """Получение элемента справочника по имени"""
     try:
-        item = reference_service.get(reference_type, name)
-        if item:
-            return JsonResponse(item)
+        # Используем экземпляр reference_service, а не класс
+        model = start_service.repository.get(name=name)
+        if model:
+            return JsonResponse(content=factory_converters.convert(model))
         else:
-            return ErrorResponse(f"Элемент '{name}' не найден в справочнике '{reference_type}'", status_code=404)
+            raise HTTPException(status_code=404, detail=f"Элемент '{name}' не найден в справочнике '{reference_type}'")
     except Exception as e:
-        return ErrorResponse(str(e))
-
+        raise HTTPException(status_code=400, detail=str(e))
 @app.get("/api/{reference_type}/all")
-def get_all_reference_items(reference_type: str):
+async def get_all_reference_items(reference_type: str):
     """Получение всех элементов справочника"""
     try:
-        items = reference_service.get_all(reference_type)
+        
+        if reference_type == "nomenclatures":
+            items = factory_converters.convert(start_service.nomenclatures)
+        elif reference_type == "measure_units":
+            items = factory_converters.convert(start_service.measure_units)
+        elif reference_type == "nomenclature_groups":
+            items = factory_converters.convert(start_service.nomenclature_groups)
+        elif reference_type == "storages":
+            items = factory_converters.convert(start_service.storages)
+        elif reference_type == "transactions":
+            items = factory_converters.convert(start_service.transactions)
+        elif reference_type == "recipes":
+            items = factory_converters.convert(start_service.data.get(Repository.recipes_key, {}))
+        else:
+            raise HTTPException(status_code=400, detail=f"Неизвестный тип справочника: {reference_type}")
         return JsonResponse(items)
     except Exception as e:
-        return ErrorResponse(str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.put("/api/{reference_type}")
-def add_reference_item(reference_type: str, data: dict):
+async def put_reference(reference_type: str, data: dict):
     """Добавление нового элемента справочника"""
     try:
-        result = reference_service.add(reference_type, data)
-        return JsonResponse(result)
+        ReferenceService.add(reference_type, data)
+        return {"status": "SUCCESS"}
     except Exception as e:
-        return ErrorResponse(str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.patch("/api/{reference_type}")
-def update_reference_item(reference_type: str, name: str = Query(...), data: dict = None):
+async def patch_reference(reference_type: str, name: str = Query(...), data: dict = None):
     """Обновление элемента справочника"""
     try:
         if data is None:
             return ErrorResponse("Не переданы данные для обновления")
         
-        result = reference_service.update(reference_type, name, data)
-        return JsonResponse(result)
+        # Для обновления нужен unique_code, используем name для поиска
+        item = reference_service.get(reference_type, name)
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Элемент '{name}' не найден")
+        
+        # Добавляем unique_code в данные для обновления
+        update_data = {"unique_code": item.get("unique_code"), **data}
+        ReferenceService.change(reference_type, update_data)
+        return {"status": "SUCCESS"}
     except Exception as e:
-        return ErrorResponse(str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.delete("/api/{reference_type}")
-def delete_reference_item(reference_type: str, name: str = Query(...)):
+async def delete_reference(reference_type: str, name: str = Query(...)):
     """Удаление элемента справочника"""
     try:
-        success = reference_service.delete(reference_type, name)
-        return JsonResponse({"success": success, "message": f"Элемент '{name}' удален"})
-    except Exception as e:
-        return ErrorResponse(str(e))
-
-@app.get("/api/{reference_type}/search")
-def search_reference_items(reference_type: str, criteria: dict = None):
-    """Поиск элементов справочника по критериям"""
-    try:
-        if criteria is None:
-            return ErrorResponse("Не переданы критерии поиска")
+        # Находим элемент по имени чтобы получить unique_code
+        item = reference_service.get(reference_type, name)
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Элемент '{name}' не найден")
         
-        items = reference_service.find_by_criteria(reference_type, criteria)
-        return JsonResponse(items)
+        ReferenceService.remove(reference_type, {"unique_code": item.get("unique_code")})
+        return {"status": "SUCCESS"}
     except Exception as e:
-        return ErrorResponse(str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/block_date/update")
+async def update_block_date(new_block_date: date = Query(...)):
+    """Обновление даты блокировки"""
+    try:
+        # Преобразуем date в datetime (устанавливаем время на начало дня)
+        new_block_datetime = datetime.combine(new_block_date, datetime.min.time())
+        
+        observe_service.create_event(event_type.change_block_period(), {
+            "new_block_date": new_block_datetime
+        })
+        return {"status": "success", "new_block_date": new_block_date.strftime("%Y-%m-%d")}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 if __name__ == "__main__":

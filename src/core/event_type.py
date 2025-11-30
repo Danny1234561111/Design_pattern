@@ -18,28 +18,63 @@ class event_type:
         return "convert_to_json"
 
     """
-    Событие - добавлен элемент справочника
+    Событие - добавление reference
+    """
+    @staticmethod
+    def add_reference() -> str:
+        return "add_reference"
+
+    """
+    Событие - изменение reference
+    """
+    @staticmethod
+    def change_reference() -> str:
+        return "change_reference"
+
+    """
+    Событие - удаление reference
+    """
+    @staticmethod
+    def remove_reference() -> str:
+        return "remove_reference"
+
+    """
+    Событие - обновить зависимости от reference
+    """
+    @staticmethod
+    def update_dependencies() -> str:
+        return "update_dependencies"
+
+    """
+    Событие - проверить зависимости от reference
+    """
+    @staticmethod
+    def check_dependencies() -> str:
+        return "check_dependencies"
+
+    """
+    Событие - reference добавлен
     """
     @staticmethod
     def reference_added() -> str:
         return "reference_added"
-    
+
     """
-    Событие - обновлен элемент справочника
+    Событие - reference обновлен
     """
     @staticmethod
     def reference_updated() -> str:
         return "reference_updated"
-    
+
     """
-    Событие - удален элемент справочника
+    Событие - reference удален
     """
     @staticmethod
     def reference_deleted() -> str:
         return "reference_deleted"
-    
+
     """
-    Событие - операция со справочником завершена
+    Событие - операция с reference завершена
     """
     @staticmethod
     def reference_operation_completed() -> str:
