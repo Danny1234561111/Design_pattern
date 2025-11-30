@@ -16,7 +16,6 @@ class ReferenceService(AbstractSubscriber):
     def add(reference_type: str, properties: dict):
         vld.validate(reference_type, str, "reference_type")
         vld.validate(properties, dict, "properties")
-        print("Ошибка не тут")
         observe_service.create_event(event_type.add_reference(), {
             "model": reference_type,
             "properties": properties
