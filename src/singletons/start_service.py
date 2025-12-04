@@ -1,4 +1,3 @@
-# src/singletons/start_service.py
 import json
 import os
 from typing import Optional, Dict, Any, List
@@ -27,6 +26,9 @@ from src.models.nomenclature_group_model import NomenclatureGroupModel
 from src.models.transaction_model import TransactionModel
 from src.models.storage_model import StorageModel
 
+# Импорт логгера
+from src.logics.print_service import print_service
+
 
 class StartService(AbstractSubscriber):
     __instance = None
@@ -53,6 +55,9 @@ class StartService(AbstractSubscriber):
         super().__init__()
         self.__repository.initalize()
         observe_service.add(self)
+        
+        # Инициализируем логгер
+        self._logger = print_service()
 
     @property
     def file_name(self) -> str:
@@ -74,7 +79,7 @@ class StartService(AbstractSubscriber):
     def block_date(self, value: date):
         vld.validate(value, date, "block_date")
         self.__settings_manager.settings.block_date = value
-    
+
     @property
     def repository(self) -> Repository:
         return self.__repository
@@ -113,8 +118,20 @@ class StartService(AbstractSubscriber):
             raise OperationException("Data can't be loaded, file_name field is empty")
         
         try:
+            # Создаем событие о начале загрузки
+            observe_service.create_event(event_type.convert_to_json(), {
+                "file": self.file_name,
+                "operation": "start_loading"
+            })
+            
             # Загружаем настройки
             self.__settings_manager.load(self.file_name)
+            
+            # Логируем загрузку настроек
+            self._logger.log_info(f"Settings loaded from {self.file_name}", {
+                "block_date": self.block_date,
+                "log_level": self.__settings_manager.settings.log_level
+            })
             
             # Загружаем данные моделей
             with open(self.file_name, mode='r', encoding="utf-8") as file:
@@ -123,9 +140,52 @@ class StartService(AbstractSubscriber):
                 block_date = None
                 if "block_date" in objects:
                     block_date = datetime.strptime(objects["block_date"], "%Y-%m-%d").date()
-                return self.convert(data, block_date)
+                
+                # Логируем загрузку данных
+                model_counts = {}
+                for key in ["nomenclature_groups", "measure_units", "nomenlatures", 
+                           "recipes", "storages", "transactions"]:
+                    if key in data:
+                        model_counts[key] = len(data[key])
+                
+                self._logger.log_info("Loading models from file", {
+                    "file": self.file_name,
+                    "model_counts": model_counts,
+                    "block_date": block_date
+                })
+                
+                result = self.convert(data, block_date)
+                
+                # Логируем успешную загрузку
+                self._logger.log_info("Data loaded successfully", {
+                    "total_models": sum(len(v) for v in self.__repository.data.values())
+                })
+                
+                return result
+                
         except json.JSONDecodeError as e:
+            # Создаем событие об ошибке
+            observe_service.create_event(event_type.reference_operation_completed(), {
+                "operation": "load_data",
+                "status": "error",
+                "error": f"Invalid JSON file: {e}"
+            })
+            self._logger.log_error("Invalid JSON file", {
+                "file": self.file_name,
+                "error": str(e)
+            })
             raise OperationException(f"Invalid JSON file: {e}")
+        except Exception as e:
+            observe_service.create_event(event_type.reference_operation_completed(), {
+                "operation": "load_data",
+                "status": "error",
+                "error": f"Error loading data: {e}"
+            })
+            self._logger.log_error("Error loading data", {
+                "file": self.file_name,
+                "error": str(e)
+            })
+            raise OperationException(f"Error loading data: {e}")
 
     def __get_ost_file_name(self) -> str:
         """Генерирует имя файла для остатков на основе основного файла"""
@@ -142,16 +202,29 @@ class StartService(AbstractSubscriber):
         def default_serializer(obj):
             if isinstance(obj, date):
                 return obj.isoformat()
+            if isinstance(obj, datetime):
+                return obj.isoformat()
             return str(obj)
         
         try:
             with open(ost_file_name, mode='w', encoding="utf-8") as file:
                 json.dump(repository_data, file, ensure_ascii=False, indent=2, default=default_serializer)
+            
+            self._logger.log_info("Repository data saved", {
+                "file": ost_file_name,
+                "headers_count": len(repository_data.get("headers", [])),
+                "transactions_count": len(repository_data.get("next_transactions", []))
+            })
+            
         except Exception as e:
             observe_service.create_event(event_type.reference_operation_completed(), {
                 "operation": "save_repository_data",
                 "status": "error",
                 "error": f"Failed to save repository data: {e}"
+            })
+            self._logger.log_error("Failed to save repository data", {
+                "file": ost_file_name,
+                "error": str(e)
             })
             raise OperationException(f"Failed to save repository data: {e}")
 
@@ -163,14 +236,26 @@ class StartService(AbstractSubscriber):
             with open(ost_file_name, mode='r', encoding="utf-8") as file:
                 repo_data = json.load(file)
                 self.__load_repository_data(repo_data)
+                
+                self._logger.log_info("Repository data loaded", {
+                    "file": ost_file_name,
+                    "headers_count": len(repo_data.get("headers", [])),
+                    "transactions_count": len(repo_data.get("next_transactions", []))
+                })
+                
                 return True
         except FileNotFoundError:
+            self._logger.log_debug("OST file not found", {"file": ost_file_name})
             return False
         except json.JSONDecodeError as e:
             observe_service.create_event(event_type.reference_operation_completed(), {
                 "operation": "load_repository_data",
                 "status": "error", 
                 "error": f"Invalid OST JSON file: {e}"
+            })
+            self._logger.log_error("Invalid OST JSON file", {
+                "file": ost_file_name,
+                "error": str(e)
             })
             raise OperationException(f"Invalid OST JSON file: {e}")
 
@@ -213,6 +298,7 @@ class StartService(AbstractSubscriber):
         if not items:
             return False
         
+        converted_count = 0
         for item in items:
             if self.__repository.get_by_name(item.get("name", "")):
                 continue
@@ -220,7 +306,16 @@ class StartService(AbstractSubscriber):
             dto = dto_type().load(item)
             model = model_type.from_dto(dto, self.__repository)
             self.__repository.data[repo_key][model.name] = model
-
+            converted_count += 1
+        
+        # Логируем конвертацию
+        if converted_count > 0:
+            self._logger.log_debug(f"Converted {converted_count} {data_key}", {
+                "data_key": data_key,
+                "repo_key": repo_key,
+                "converted_count": converted_count
+            })
+        
         return True
     
     def __convert_nomenclature_groups(self, data: dict) -> bool:
@@ -293,27 +388,54 @@ class StartService(AbstractSubscriber):
             self.repository.block_date == block_date and
             self.repository.headers and 
             self.repository.turnovers_history):
+            self._logger.log_debug("Using cached OST data", {
+                "block_date": block_date
+            })
             return True
         
         # Вычисляем новые данные
+        self._logger.log_info("Calculating OST data", {
+            "block_date": block_date
+        })
+        
         headers, display_data_rows, work_transactions, display_data_dict = OsdTbs.calculate_ost(block_date, self)
+        
         self.repository.headers = headers
         self.repository.turnovers_history = display_data_rows
         self.repository.next_transactions = work_transactions
         self.repository.display_data_dict = display_data_dict
         self.repository.block_date = block_date
+        
+        # Логируем результаты
+        self._logger.log_info("OST calculation completed", {
+            "block_date": block_date,
+            "headers_count": len(headers),
+            "turnovers_count": len(display_data_rows),
+            "transactions_count": len(work_transactions)
+        })
+        
         self.save_repository_data()
         return True
 
     def convert(self, data: dict, block_date: date = None) -> bool:
         vld.is_dict(data, "data")
         
-        self.__convert_nomenclature_groups(data)
-        self.__convert_measure_units(data)
-        self.__convert_nomenlatures(data)
-        self.__convert_recipes(data)
-        self.__convert_storages(data) 
-        self.__convert_transactions(data)
+        self._logger.log_debug("Starting data conversion")
+        
+        # Конвертируем все модели
+        conversion_results = {}
+        conversion_results["nomenclature_groups"] = self.__convert_nomenclature_groups(data)
+        conversion_results["measure_units"] = self.__convert_measure_units(data)
+        conversion_results["nomenclatures"] = self.__convert_nomenlatures(data)
+        conversion_results["recipes"] = self.__convert_recipes(data)
+        conversion_results["storages"] = self.__convert_storages(data) 
+        conversion_results["transactions"] = self.__convert_transactions(data)
+        
+        # Логируем результаты конвертации
+        self._logger.log_info("Data conversion completed", {
+            "conversion_results": conversion_results,
+            "total_items": sum(len(models) for models in self.__repository.data.values())
+        })
         
         if block_date:
             self.__repository.block_date = block_date
@@ -324,6 +446,13 @@ class StartService(AbstractSubscriber):
     def start(self, file_name: str):
         self.file_name = file_name
         self.load()
+        
+        # Логируем запуск сервиса
+        self._logger.log_info("StartService started", {
+            "file": file_name,
+            "block_date": self.block_date,
+            "settings_file": self.__settings_manager.file_name
+        })
 
     def save_data(self):
         """Сохраняет все данные в файл"""
@@ -340,11 +469,18 @@ class StartService(AbstractSubscriber):
                 "file_path": self.file_name
             })
             
+            self._logger.log_info("Data saved successfully", {
+                "file": self.file_name
+            })
+            
         except Exception as e:
             observe_service.create_event(event_type.reference_operation_completed(), {
                 "operation": "save_data",
                 "status": "error",
                 "error": f"Ошибка сохранения данных: {e}"
+            })
+            self._logger.log_error("Error saving data", {
+                "error": str(e)
             })
 
     # Методы для работы с элементами репозитория
@@ -374,6 +510,13 @@ class StartService(AbstractSubscriber):
             repo_key = self._get_repo_key(reference_type)
             self.__save_item(repo_key, model)
             
+            # Логируем добавление
+            self._logger.log_info(f"Reference added: {reference_type}", {
+                "type": reference_type,
+                "name": properties.get('name', 'unknown'),
+                "unique_code": model.unique_code
+            })
+            
             observe_service.create_event(event_type.reference_added(), {
                 "type": reference_type,
                 "name": properties.get('name', 'unknown'),
@@ -387,6 +530,10 @@ class StartService(AbstractSubscriber):
                 "operation": "add_reference",
                 "status": "error",
                 "error": f"Ошибка добавления {reference_type}: {e}"
+            })
+            self._logger.log_error(f"Error adding reference: {reference_type}", {
+                "error": str(e),
+                "properties": properties
             })
             raise
 
@@ -418,6 +565,14 @@ class StartService(AbstractSubscriber):
             self.__pop_item(repo_key, old_model)
             self.__save_item(repo_key, new_model)
             
+            # Логируем изменение
+            self._logger.log_info(f"Reference updated: {reference_type}", {
+                "type": reference_type,
+                "unique_code": unique_code,
+                "old_name": old_model.name,
+                "new_name": new_model.name
+            })
+            
             observe_service.create_event(event_type.reference_updated(), {
                 "type": reference_type,
                 "unique_code": unique_code,
@@ -431,6 +586,11 @@ class StartService(AbstractSubscriber):
                 "operation": "change_reference",
                 "status": "error",
                 "error": f"Ошибка изменения {reference_type}: {e}"
+            })
+            self._logger.log_error(f"Error changing reference: {reference_type}", {
+                "error": str(e),
+                "unique_code": unique_code,
+                "properties": properties
             })
             raise
 
@@ -449,6 +609,13 @@ class StartService(AbstractSubscriber):
             repo_key = self._get_repo_key(reference_type)
             self.__pop_item(repo_key, model)
             
+            # Логируем удаление
+            self._logger.log_warning(f"Reference deleted: {reference_type}", {
+                "type": reference_type,
+                "unique_code": unique_code,
+                "name": model.name
+            })
+            
             observe_service.create_event(event_type.reference_deleted(), {
                 "type": reference_type,
                 "unique_code": unique_code
@@ -461,6 +628,10 @@ class StartService(AbstractSubscriber):
                 "operation": "remove_reference",
                 "status": "error",
                 "error": f"Ошибка удаления {reference_type}: {e}"
+            })
+            self._logger.log_error(f"Error removing reference: {reference_type}", {
+                "error": str(e),
+                "unique_code": unique_code
             })
             raise
 
@@ -514,6 +685,25 @@ class StartService(AbstractSubscriber):
         try:
             abs_path = os.path.abspath(file_path)
             
+            # Создаем событие о начале сохранения
+            observe_service.create_event(event_type.convert_to_json(), {
+                "file": abs_path,
+                "operation": "start_saving"
+            })
+            
+            # Логируем начало сохранения
+            self._logger.log_info("Saving repository", {
+                "file": abs_path,
+                "model_counts": {
+                    "measure_units": len(self.measure_units),
+                    "nomenclature_groups": len(self.nomenclature_groups),
+                    "nomenclatures": len(self.nomenclatures),
+                    "recipes": len(self.recipes),
+                    "storages": len(self.storages),
+                    "transactions": len(self.transactions)
+                }
+            })
+            
             # Конвертируем данные в требуемый формат
             result = self.__convert_to_required_format()
             
@@ -524,7 +714,13 @@ class StartService(AbstractSubscriber):
             
             with open(abs_path, 'w', encoding='utf-8') as file:
                 json.dump(object_to_dto(result), file, ensure_ascii=False, indent=2)
-                
+            
+            # Логируем успешное сохранение
+            self._logger.log_info("Repository saved successfully", {
+                "file": abs_path,
+                "total_items": sum(len(arr) for arr in result.values() if isinstance(arr, list))
+            })
+            
             observe_service.create_event(event_type.reference_operation_completed(), {
                 "operation": "save_repository",
                 "status": "success",
@@ -536,6 +732,10 @@ class StartService(AbstractSubscriber):
                 "operation": "save_repository",
                 "status": "error",
                 "error": f"Ошибка сохранения основного репозитория: {e}"
+            })
+            self._logger.log_error("Error saving repository", {
+                "file": file_path,
+                "error": str(e)
             })
             raise OperationException(f"Не удалось сохранить репозиторий: {e}")
 
@@ -552,7 +752,12 @@ class StartService(AbstractSubscriber):
             # Сохраняем обратно
             with open(file_path, 'w', encoding='utf-8') as file:
                 json.dump(current_settings, file, ensure_ascii=False, indent=2)
-                
+            
+            self._logger.log_info("Settings saved", {
+                "file": file_path,
+                "block_date": self.block_date
+            })
+            
             observe_service.create_event(event_type.reference_operation_completed(), {
                 "operation": "save_settings",
                 "status": "success",
@@ -564,6 +769,10 @@ class StartService(AbstractSubscriber):
                 "operation": "save_settings",
                 "status": "error",
                 "error": f"Ошибка сохранения настроек: {e}"
+            })
+            self._logger.log_error("Error saving settings", {
+                "file": file_path,
+                "error": str(e)
             })
             raise OperationException(f"Не удалось сохранить настройки: {e}")
 
