@@ -11,6 +11,15 @@
     "default_response_format": "json",
     "first_start": true,
     "datetime_format": "%Y-%m-%d",
+    "logging": {
+    "log_level": "ERROR",
+    "log_mode": "both",
+    "log_directory": "logs",
+    "log_date_format": "%Y-%m-%d %H:%M:%S",
+    "log_file_prefix": "warehouse_system",
+    "log_max_size_mb": 10,
+    "log_retention_days": 30
+    },
     "models": {
         "nomenclature_groups": [
             {
